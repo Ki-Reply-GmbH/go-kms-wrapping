@@ -5,115 +5,244 @@ package pkcs11
 
 import (
 	"context"
+	"crypto"
+	"crypto/rsa"
 	"fmt"
-	"sync/atomic"
+	"io"
+	"strconv"
 
+	"github.com/ThalesGroup/crypto11"
 	wrapping "github.com/openbao/go-kms-wrapping/v2"
 )
 
-// Wrapper is a Wrapper that uses PKCS11
 type Wrapper struct {
-	client       pkcs11ClientEncryptor
-	keyId        string
-	currentKeyId *atomic.Value
+	ctx *crypto11.Context
+
+	key Key
+
+	mechanism   Mechanism
+	rsaOaepHash crypto.Hash
 }
 
-// Ensure that we are implementing Wrapper
-var _ wrapping.Wrapper = (*Wrapper)(nil)
+var (
+	_ wrapping.Wrapper       = (*Wrapper)(nil)
+	_ wrapping.InitFinalizer = (*Wrapper)(nil)
+)
 
-// NewWrapper creates a new PKCS11 Wrapper
 func NewWrapper() *Wrapper {
-	k := &Wrapper{
-		currentKeyId: new(atomic.Value),
+	return &Wrapper{}
+}
+
+func (k *Wrapper) Init(_ context.Context, _ ...wrapping.Option) error {
+	return nil
+}
+
+func (k *Wrapper) Finalize(_ context.Context, _ ...wrapping.Option) error {
+	if k.ctx != nil {
+		return k.ctx.Close()
 	}
-	k.currentKeyId.Store("")
-	return k
-}
-
-// Init is called during core.Initialize
-func (k *Wrapper) Init(_ context.Context) error {
 	return nil
 }
 
-// Finalize is called during shutdown
-func (k *Wrapper) Finalize(_ context.Context) error {
-	k.client.Close()
-	return nil
-}
-
-// SetConfig processes the config info from the server config
-func (k *Wrapper) SetConfig(_ context.Context, opt ...wrapping.Option) (*wrapping.WrapperConfig, error) {
-	// Option validation is performed by newPkcs11Client(...).
-	opts, err := getOpts(opt...)
+func (k *Wrapper) SetConfig(_ context.Context, options ...wrapping.Option) (*wrapping.WrapperConfig, error) {
+	opts, err := getOpts(options...)
 	if err != nil {
 		return nil, err
 	}
 
-	client, wrapConfig, err := newPkcs11Client(opts)
+	metadata := make(map[string]string)
+
+	key := NewKey(opts.withKeyId, opts.withKeyLabel)
+	if key.id == "" && key.label == "" {
+		return nil, fmt.Errorf("one of key id, key label is required")
+	}
+	k.key = key
+	metadata["key_id"] = key.id
+	metadata["key_label"] = key.label
+
+	if opts.withMechanism != "" {
+		mechanism, err := MechanismFromString(opts.withMechanism)
+		if err != nil {
+			return nil, err
+		}
+		k.mechanism = mechanism
+		metadata["mechanism"] = k.mechanism.String()
+	} else {
+		k.mechanism = MechanismUnspecified
+	}
+
+	if k.mechanism == MechanismRsaOaep {
+		if opts.withRsaOaepHash != "" {
+			rsaOaepHash, err := RsaOaepHashMechanismFromString(opts.withRsaOaepHash)
+			if err != nil {
+				return nil, err
+			}
+			k.rsaOaepHash = rsaOaepHash
+		} else {
+			k.rsaOaepHash = DefaultRsaOaepHashMechanism
+		}
+		metadata["rsa_oaep_hash"] = k.rsaOaepHash.String()
+	}
+
+	var slot *int
+	if opts.withSlot != "" {
+		parsed, err := numberAutoParse(opts.withSlot, 32)
+		if err != nil {
+			return nil, err
+		}
+		// crypto11 converts back to uint again later...
+		asInt := int(parsed)
+		slot = &asInt
+		metadata["slot"] = strconv.FormatUint(parsed, 10)
+	}
+
+	if opts.withTokenLabel != "" {
+		metadata["token_label"] = opts.withTokenLabel
+	} else if slot == nil {
+		return nil, fmt.Errorf("one of slot, token label is required")
+	}
+
+	if opts.withLib == "" {
+		return nil, fmt.Errorf("lib is required")
+	}
+	metadata["lib"] = opts.withLib
+
+	config := &crypto11.Config{
+		SlotNumber: slot,
+		TokenLabel: opts.withTokenLabel,
+		Pin:        opts.withPin,
+		Path:       opts.withLib,
+	}
+	ctx, err := crypto11.Configure(config)
 	if err != nil {
 		return nil, err
 	}
-	k.client = client
-	k.keyId = client.GetCurrentKey().String()
+	k.ctx = ctx
 
-	return wrapConfig, nil
+	return &wrapping.WrapperConfig{Metadata: metadata}, nil
 }
 
-// Type returns the type for this particular wrapper implementation
 func (k *Wrapper) Type(_ context.Context) (wrapping.WrapperType, error) {
 	return wrapping.WrapperTypePkcs11, nil
 }
 
-// KeyId returns the last known key id
 func (k *Wrapper) KeyId(_ context.Context) (string, error) {
-	return k.currentKeyId.Load().(string), nil
+	return k.key.String(), nil
 }
 
-// Encrypt is used to encrypt data using the the PKCS11 key.
-// This returns the ciphertext, and/or any errors from this
-// call. This should be called after the KMS client has been instantiated.
-func (k *Wrapper) Encrypt(_ context.Context, plaintext []byte, opt ...wrapping.Option) (*wrapping.BlobInfo, error) {
-	ciphertext, iv, key, err := k.client.Encrypt(plaintext)
-	if err != nil {
-		return nil, err
-	}
+func (k *Wrapper) Encrypt(_ context.Context, plaintext []byte, _ ...wrapping.Option) (*wrapping.BlobInfo, error) {
+	id, label := k.key.Bytes()
 
-	keyId := key.String()
-	k.currentKeyId.Store(keyId)
-
-	ret := &wrapping.BlobInfo{
-		Ciphertext: ciphertext,
-		Iv:         iv,
-		KeyInfo: &wrapping.KeyInfo{
-			KeyId: keyId,
-		},
-	}
-	return ret, nil
-}
-
-// Decrypt is used to decrypt the ciphertext. This should be called after Init.
-func (k *Wrapper) Decrypt(_ context.Context, in *wrapping.BlobInfo, opt ...wrapping.Option) ([]byte, error) {
-	if in == nil {
-		return nil, fmt.Errorf("given input for decryption is nil")
-	}
-
-	if in.KeyInfo == nil {
-		in.KeyInfo = &wrapping.KeyInfo{
-			KeyId: k.keyId,
+	if k.mechanism == MechanismAesGcm || k.mechanism == MechanismUnspecified {
+		key, err := k.ctx.FindKey(id, label)
+		if err != nil {
+			return nil, err
+		}
+		if key != nil {
+			return k.encryptAesGcm(key, plaintext, nil)
 		}
 	}
-	keyId, err := newPkcs11Key(in.KeyInfo.KeyId)
-	if err != nil {
-		return nil, err
+
+	if k.mechanism == MechanismRsaOaep || k.mechanism == MechanismUnspecified {
+		keypair, err := k.ctx.FindRSAKeyPair(id, label)
+		if err != nil {
+			return nil, err
+		}
+		if keypair != nil {
+			return k.encryptRsa(keypair, plaintext)
+		}
 	}
-	plaintext, err := k.client.Decrypt(in.Ciphertext, in.Iv, keyId)
-	if err != nil {
-		return nil, err
-	}
-	return plaintext, nil
+
+	return nil, fmt.Errorf("no key matching mechanism and key id/label found")
 }
 
-// GetClient returns the pkcs11 Wrapper's pkcs11ClientEncryptor
-func (k *Wrapper) GetClient() pkcs11ClientEncryptor {
-	return k.client
+func (k *Wrapper) encryptAesGcm(key *crypto11.SecretKey, plaintext, additionalData []byte) (*wrapping.BlobInfo, error) {
+	cipher, err := key.NewGCM()
+	if err != nil {
+		return nil, err
+	}
+
+	rand, err := k.ctx.NewRandomReader()
+	if err != nil {
+		return nil, err
+	}
+
+	nonce := make([]byte, cipher.NonceSize())
+	if _, err := io.ReadFull(rand, nonce); err != nil {
+		return nil, err
+	}
+
+	ciphertext := cipher.Seal(nil, nonce, plaintext, additionalData)
+
+	// Some HSMs (CloudHSM) do not read the nonce/IV and generate their own.
+	// Since it's appended, we need to extract it.
+	if len(ciphertext) == crypto11.DefaultGCMIVLength+len(plaintext)+cipher.Overhead() {
+		nonce = ciphertext[len(ciphertext)-cipher.NonceSize():]
+		ciphertext = ciphertext[:len(ciphertext)-cipher.NonceSize()]
+	}
+
+	return &wrapping.BlobInfo{
+		Ciphertext: ciphertext,
+		Iv:         nonce,
+		KeyInfo: &wrapping.KeyInfo{
+			KeyId: k.key.String(),
+		},
+	}, nil
+}
+
+func (k *Wrapper) encryptRsa(keypair crypto11.RSAKeyPair, plaintext []byte) (*wrapping.BlobInfo, error) {
+	ciphertext, err := keypair.EncryptOAEP(k.rsaOaepHash, plaintext, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return &wrapping.BlobInfo{
+		Ciphertext: ciphertext,
+		KeyInfo: &wrapping.KeyInfo{
+			KeyId: k.key.String(),
+		},
+	}, nil
+}
+
+func (k *Wrapper) Decrypt(_ context.Context, in *wrapping.BlobInfo, _ ...wrapping.Option) ([]byte, error) {
+	id, label := k.key.Bytes()
+
+	if k.mechanism == MechanismAesGcm || k.mechanism == MechanismUnspecified {
+		key, err := k.ctx.FindKey(id, label)
+		if err != nil {
+			return nil, err
+		}
+		if key != nil {
+			return k.decryptAesGcm(key, in.Iv, in.Ciphertext, nil)
+		}
+	}
+
+	if k.mechanism == MechanismRsaOaep || k.mechanism == MechanismUnspecified {
+		keypair, err := k.ctx.FindRSAKeyPair(id, label)
+		if err != nil {
+			return nil, err
+		}
+		if keypair != nil {
+			return k.decryptRsa(keypair, in.Ciphertext)
+		}
+	}
+
+	return nil, fmt.Errorf("no key matching mechanism and key id/label found")
+}
+
+func (k *Wrapper) decryptAesGcm(key *crypto11.SecretKey, nonce, ciphertext, additionalData []byte) ([]byte, error) {
+	cipher, err := key.NewGCM()
+	if err != nil {
+		return nil, err
+	}
+
+	return cipher.Open(nil, nonce, ciphertext, additionalData)
+}
+
+func (k *Wrapper) decryptRsa(keypair crypto11.RSAKeyPair, ciphertext []byte) ([]byte, error) {
+	return keypair.Decrypt(nil, ciphertext, &rsa.OAEPOptions{Hash: crypto.SHA1})
+}
+
+func (k *Wrapper) GetClient() *crypto11.Context {
+	return k.ctx
 }

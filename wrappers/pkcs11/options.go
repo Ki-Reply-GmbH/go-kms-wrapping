@@ -6,12 +6,23 @@ package pkcs11
 
 import (
 	wrapping "github.com/openbao/go-kms-wrapping/v2"
+	"github.com/openbao/openbao/api/v2"
+)
+
+const (
+	EnvHsmWrapperLib         = "BAO_HSM_LIB"
+	EnvHsmWrapperSlot        = "BAO_HSM_SLOT"
+	EnvHsmWrapperTokenLabel  = "BAO_HSM_TOKEN_LABEL"
+	EnvHsmWrapperPin         = "BAO_HSM_PIN"
+	EnvHsmWrapperKeyLabel    = "BAO_HSM_KEY_LABEL"
+	EnvHsmWrapperKeyId       = "BAO_HSM_KEY_ID"
+	EnvHsmWrapperMechanism   = "BAO_HSM_MECHANISM"
+	EnvHsmWrapperRsaOaepHash = "BAO_HSM_RSA_OAEP_HASH"
 )
 
 // getOpts iterates the inbound Options and returns a struct
 func getOpts(opt ...wrapping.Option) (*options, error) {
 	// First, separate out options into local and global
-	opts := getDefaultOptions()
 	var wrappingOptions []wrapping.Option
 	var localOptions []OptionFunc
 	for _, o := range opt {
@@ -28,6 +39,7 @@ func getOpts(opt ...wrapping.Option) (*options, error) {
 	}
 
 	// Parse the global options
+	var opts options
 	var err error
 	opts.Options, err = wrapping.GetOpts(wrappingOptions...)
 	if err != nil {
@@ -45,7 +57,6 @@ func getOpts(opt ...wrapping.Option) (*options, error) {
 	if opts.WithConfigMap != nil {
 		for k, v := range opts.WithConfigMap {
 			switch k {
-			// case "key_id", "kms_key_id": // deprecated backend-specific value, set global
 			case "key_id":
 				opts.withKeyId = v
 			case "slot":
@@ -80,7 +91,38 @@ func getOpts(opt ...wrapping.Option) (*options, error) {
 		return nil, err
 	}
 
+	if !opts.WithDisallowEnvVars {
+		mergeWithEnv(&opts)
+	}
+
 	return &opts, nil
+}
+
+func mergeWithEnv(opts *options) {
+	if env := api.ReadBaoVariable(EnvHsmWrapperLib); env != "" {
+		opts.withLib = env
+	}
+	if env := api.ReadBaoVariable(EnvHsmWrapperSlot); env != "" {
+		opts.withSlot = env
+	}
+	if env := api.ReadBaoVariable(EnvHsmWrapperTokenLabel); env != "" {
+		opts.withTokenLabel = env
+	}
+	if env := api.ReadBaoVariable(EnvHsmWrapperPin); env != "" {
+		opts.withPin = env
+	}
+	if env := api.ReadBaoVariable(EnvHsmWrapperKeyLabel); env != "" {
+		opts.withKeyLabel = env
+	}
+	if env := api.ReadBaoVariable(EnvHsmWrapperKeyId); env != "" {
+		opts.WithKeyId = env
+	}
+	if env := api.ReadBaoVariable(EnvHsmWrapperMechanism); env != "" {
+		opts.withMechanism = env
+	}
+	if env := api.ReadBaoVariable(EnvHsmWrapperRsaOaepHash); env != "" {
+		opts.withRsaOaepHash = env
+	}
 }
 
 // OptionFunc holds a function with local options
@@ -100,10 +142,6 @@ type options struct {
 	withRsaOaepHash string
 }
 
-func getDefaultOptions() options {
-	return options{}
-}
-
 // WithSlot sets the slot
 func WithSlot(slot string) wrapping.Option {
 	return func() interface{} {
@@ -114,7 +152,7 @@ func WithSlot(slot string) wrapping.Option {
 	}
 }
 
-// WithSlot sets the slot
+// WithTokenLabel sets the token label
 func WithTokenLabel(slot string) wrapping.Option {
 	return func() interface{} {
 		return OptionFunc(func(o *options) error {
@@ -134,7 +172,7 @@ func WithPin(pin string) wrapping.Option {
 	}
 }
 
-// WithLib sets the module
+// WithLib sets the module (dynamic library)
 func WithLib(lib string) wrapping.Option {
 	return func() interface{} {
 		return OptionFunc(func(o *options) error {
@@ -144,7 +182,7 @@ func WithLib(lib string) wrapping.Option {
 	}
 }
 
-// WithLabel sets the label
+// WithKeyId sets the key id
 func WithKeyId(keyId string) wrapping.Option {
 	return func() interface{} {
 		return OptionFunc(func(o *options) error {
@@ -154,7 +192,7 @@ func WithKeyId(keyId string) wrapping.Option {
 	}
 }
 
-// WithLabel sets the label
+// WithKeyLabel sets the key label
 func WithKeyLabel(label string) wrapping.Option {
 	return func() interface{} {
 		return OptionFunc(func(o *options) error {
