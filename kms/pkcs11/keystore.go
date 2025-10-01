@@ -9,7 +9,31 @@ import (
 	"github.com/openbao/go-kms-wrapping/v2/kms"
 )
 
-type keyStore struct{}
+const (
+	// LibKeyStoreParam sets the path to the PKCS#11 library.
+	LibKeyStoreParam = "lib"
+
+	// PinKeyStoreParam sets the user pin for the PKCS#11 slot.
+	PinKeyStoreParam = "pin"
+
+	// SlotKeyStoreParam sets the PKCS#11 slot ID.
+	SlotKeyStoreParam = "slot"
+
+	// TokenLabelKeyStoreParam sets the PKCS#11 token label.
+	TokenLabelKeyStoreParam = "token_label"
+
+	// DisableSoftwareEncryptionKeyStoreParam disables local public key
+	// encryption in software and performs it on-device instead.
+	DisableSoftwareEncryptionKeyStoreParam = "disable_software_encryption"
+
+	// DisableSoftwareVerificationKeyStoreParam disables local public key
+	// verification in software and performs it on-device instead.
+	DisableSoftwareVerificationKeyStoreParam = "disable_software_verification"
+)
+
+type keyStore struct {
+	*pool
+}
 
 var (
 	_ kms.KeyStore    = (*keyStore)(nil)
