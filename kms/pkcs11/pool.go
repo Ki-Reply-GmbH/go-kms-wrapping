@@ -125,6 +125,10 @@ func (p *pool) close() error {
 	// Close the pool:
 	p.cond.L.Lock()
 	defer p.cond.L.Unlock()
+	if p.closed {
+		// This makes close() idempotent, just for safety.
+		return nil
+	}
 	p.closed = true
 
 	// Then drain it:

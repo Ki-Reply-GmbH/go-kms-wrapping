@@ -143,10 +143,6 @@ func (s *slot) close() error {
 
 // resolveModulePath validates and cleans a PKCS#11 dynamic library file path.
 func resolveModulePath(path string) (string, error) {
-	if path == "" {
-		return "", errors.New("module path must be set")
-	}
-
 	// Don't allow dynamic library loading via search paths. This makes it
 	// hard for us to track which file is ultimately opened by dlopen. For more
 	// context, see the dlopen(3).
@@ -187,7 +183,7 @@ func resolveTokenInfo(ctx *pkcs11.Ctx, id *uint, label string) (uint, *pkcs11.To
 
 		// We choose the first one that matches either slot number or label,
 		// while prioritizing a match on the explicit slot number.
-		if (id != nil && *id == i) || info.Label == label {
+		if (id != nil && *id == i) || (label != "" && info.Label == label) {
 			return i, &info, err
 		}
 	}
