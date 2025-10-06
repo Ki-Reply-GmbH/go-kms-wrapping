@@ -5,11 +5,14 @@ package pkcs11
 
 import (
 	"context"
+	"encoding/hex"
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
 
 	"github.com/hashicorp/go-secure-stdlib/parseutil"
+	"github.com/miekg/pkcs11"
 	"github.com/openbao/go-kms-wrapping/v2/kms"
 )
 
@@ -34,6 +37,8 @@ const (
 	// verification in software and performs it on-device instead.
 	DisableSoftwareVerificationKeyStoreParam = "disable_software_verification"
 )
+
+var ErrKeyAssumptionNotSupported = errors.New("key assumption is not supported")
 
 type keyStore struct {
 	// These are initialized in [NewKeyStore].
@@ -153,32 +158,95 @@ func (k *keyStore) Close(ctx context.Context) error {
 	return k.pool.close()
 }
 
-func (k *keyStore) ListKeys(ctx context.Context) ([]kms.Key, error) {
-	return nil, nil
+func (k *keyStore) ListKeys(ctx context.Context) (keys []kms.Key, err error) {
+	err = k.pool.do(ctx, func(c *pkcs11.Ctx, sh pkcs11.SessionHandle) error {
+		keys, err = findKeys(c, sh, nil, 0)
+		return err
+	})
+	return keys, err
 }
 
-func (k *keyStore) GetKeyById(ctx context.Context, keyId string) (kms.Key, error) {
-	return nil, nil
+func (k *keyStore) GetKeyById(ctx context.Context, id string) (key kms.Key, err error) {
+	tmp := []byte(id)
+	if strings.HasPrefix(id, "0x") {
+		var err error
+		tmp, err = hex.DecodeString(id)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	template := []*pkcs11.Attribute{pkcs11.NewAttribute(pkcs11.CKA_ID, tmp)}
+
+	err = k.pool.do(ctx, func(c *pkcs11.Ctx, sh pkcs11.SessionHandle) error {
+		key, err = findOneKey(c, sh, template)
+		return err
+	})
+
+	return key, err
 }
 
-func (k *keyStore) GetKeyByName(ctx context.Context, keyId string) (kms.Key, error) {
-	return nil, nil
+func (k *keyStore) GetKeyByName(ctx context.Context, name string) (key kms.Key, err error) {
+	// Up for debate: What should "Name" map to in PKCS#11? I've chosen
+	// CKA_LABEL for now, but there's also a reasonable argument not to support
+	// "Name" at all, since there's no clear mapping.
+	template := []*pkcs11.Attribute{pkcs11.NewAttribute(pkcs11.CKA_LABEL, []byte(name))}
+
+	err = k.pool.do(ctx, func(c *pkcs11.Ctx, sh pkcs11.SessionHandle) error {
+		key, err = findOneKey(c, sh, template)
+		return err
+	})
+
+	return key, err
 }
 
-func (k *keyStore) GetKeyByAttrs(ctx context.Context, attrs map[string]any) (kms.Key, error) {
-	return nil, nil
+func (k *keyStore) GetKeyByAttrs(ctx context.Context, attrs map[string]any) (key kms.Key, err error) {
+	var template []*pkcs11.Attribute
+
+	if v, ok := attrs[kms.NameAttr]; ok {
+		name, err := parseutil.ParseString(v)
+		if err != nil {
+			return nil, err
+		}
+
+		template = append(template, pkcs11.NewAttribute(pkcs11.CKA_LABEL, []byte(name)))
+	}
+
+	if v, ok := attrs[kms.IdAttr]; ok {
+		tmp, err := parseutil.ParseString(v)
+		if err != nil {
+			return nil, err
+		}
+
+		id := []byte(tmp)
+		if strings.HasPrefix(tmp, "0x") {
+			id, err = hex.DecodeString(tmp)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		template = append(template, pkcs11.NewAttribute(pkcs11.CKA_ID, id))
+	}
+
+	err = k.pool.do(ctx, func(c *pkcs11.Ctx, sh pkcs11.SessionHandle) error {
+		key, err = findOneKey(c, sh, template)
+		return err
+	})
+
+	return key, err
 }
 
-func (k *keyStore) AssumeKeyById(keyId string) (kms.Key, error) {
-	return nil, nil
+func (k *keyStore) AssumeKeyById(id string) (kms.Key, error) {
+	return nil, ErrKeyAssumptionNotSupported
 }
 
-func (k *keyStore) AssumeKeyByName(keyId string) (kms.Key, error) {
-	return nil, nil
+func (k *keyStore) AssumeKeyByName(name string) (kms.Key, error) {
+	return nil, ErrKeyAssumptionNotSupported
 }
 
 func (k *keyStore) AssumeKeyByAttrs(attrs map[string]any) (kms.Key, error) {
-	return nil, nil
+	return nil, ErrKeyAssumptionNotSupported
 }
 
 func (k *keyStore) GetInfo() map[string]string {

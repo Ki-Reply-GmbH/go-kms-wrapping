@@ -145,10 +145,10 @@ func (p *pool) close() error {
 
 // do is a convenience wrapper around [pool.get] and [pool.put], calling the
 // passed callback function with a valid session and discarding it afterwards.
-func (p *pool) do(ctx context.Context, callback func(pkcs11.SessionHandle) error) error {
+func (p *pool) do(ctx context.Context, callback func(*pkcs11.Ctx, pkcs11.SessionHandle) error) error {
 	session, err := p.get(ctx)
 	if err != nil {
 		return err
 	}
-	return errors.Join(callback(session), p.put(session))
+	return errors.Join(callback(p.slot.Ctx, session), p.put(session))
 }

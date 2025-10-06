@@ -190,3 +190,12 @@ func resolveTokenInfo(ctx *pkcs11.Ctx, id *uint, label string) (uint, *pkcs11.To
 
 	return 0, nil, errors.New("no matching token slot found")
 }
+
+// pkcs11Error wraps an error returned by a PKCS#11 in a common message format.
+func pkcs11Error(op string, inner error) error {
+	if inner == nil {
+		return nil
+	} else {
+		return fmt.Errorf("failed to pkcs#11 %s: %w", op, inner)
+	}
+}
