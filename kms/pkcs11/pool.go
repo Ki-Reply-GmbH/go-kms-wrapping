@@ -150,5 +150,12 @@ func (p *pool) do(ctx context.Context, callback func(*pkcs11.Ctx, pkcs11.Session
 	if err != nil {
 		return err
 	}
-	return errors.Join(callback(p.slot.Ctx, session), p.put(session))
+
+	// Don't break the pool's integrity even if the callback panics.
+	defer func() {
+		err = errors.Join(p.put(session))
+	}()
+
+	err = callback(p.slot.Ctx, session)
+	return err
 }
