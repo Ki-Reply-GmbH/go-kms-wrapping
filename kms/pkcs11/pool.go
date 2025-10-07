@@ -23,12 +23,14 @@ type pool struct {
 	slot       *slot                // The underlying slot.
 	persistent pkcs11.SessionHandle // Persistent, logged-in session.
 
-	max  uint // Maximum pool size.
-	size uint // Current pool size.
+	max uint // Maximum pool size.
 
-	closed bool // True if [pool.close] was called.
+	closeContext context.Context // to stop and drain
+	closeFunc    context.CancelFunc
 
-	cond *sync.Cond // Concurrency control
+	sessionChan chan interface{} // control the distribution of sessions in the pool
+
+	wg sync.WaitGroup // tracks number of active sessions
 }
 
 // errPoolClosed is returned when a caller attempts to acquire a new session,
@@ -63,13 +65,24 @@ func newPool(s *slot, pin string) (*pool, error) {
 		)
 	}
 
-	var m sync.Mutex
+	closeContext, closeFunc := context.WithCancel(context.Background())
+
 	p := &pool{
-		slot:       s,
-		persistent: session,
-		max:        maxSessions - 1, // Minus the persistent session.
-		cond:       sync.NewCond(&m),
+		slot:         s,
+		persistent:   session,
+		max:          maxSessions - 1, // Minus the persistent session.
+		closeContext: closeContext,
+		closeFunc:    closeFunc,
+		sessionChan:  make(chan interface{}, maxSessions-1),
+		wg:           sync.WaitGroup{},
 	}
+
+	// Fill the channel with empty values, these are just tokens
+	// representing the channels left in the pool
+	for i := uint(0); i < p.max; i++ {
+		p.sessionChan <- struct{}{}
+	}
+
 	return p, nil
 }
 
@@ -77,64 +90,58 @@ func newPool(s *slot, pin string) (*pool, error) {
 // supports context cancellation such that requests can time out on highly
 // constrained pool sizes.
 func (p *pool) get(ctx context.Context) (pkcs11.SessionHandle, error) {
-	p.cond.L.Lock()
-	defer p.cond.L.Unlock()
-	if p.closed {
+	p.wg.Add(1)
+	select {
+	case <-p.closeContext.Done():
+		p.wg.Done()
 		return 0, errPoolClosed
-	}
-
-	// Wait for available capacity.
-	for p.size == p.max {
-		select {
-		case <-ctx.Done():
-			return 0, ctx.Err()
-		default:
-			p.cond.Wait()
+	case <-ctx.Done():
+		p.wg.Done()
+		return 0, ctx.Err()
+	case <-p.sessionChan:
+		// Open a new session
+		session, err := p.slot.OpenSession(p.slot.id, pkcs11.CKF_SERIAL_SESSION)
+		if err != nil {
+			// Note: I'm pretty sure this can be handled better (less indentation, more err return correctness etc...)
+			// Return the token since OpenSessino fails
+			select {
+			case p.sessionChan <- struct{}{}:
+			case <-p.closeContext.Done(): // don't block if the pool is closed
+			case <-ctx.Done(): // or if ctx is done
+			}
+			p.wg.Done()
+			return 0, pkcs11Error("OpenSession", err)
 		}
-		// Since we called Wait(), the pool might have closed.
-		if p.closed {
-			return 0, errPoolClosed
-		}
+		return session, nil
 	}
-
-	// Open a new session and grow the pool.
-	session, err := p.slot.OpenSession(p.slot.id, pkcs11.CKF_SERIAL_SESSION)
-	if err != nil {
-		return 0, pkcs11Error("OpenSession", err)
-	}
-	p.size += 1
-	return session, nil
 }
 
 // put closes the session, freeing pool capacity. The caller must ensure that
 // this function is only called once per session.
+// Note: this would fail if put is called twice for the same session, maybe
+// we need to track session handles, thus a lock anw?
 func (p *pool) put(session pkcs11.SessionHandle) error {
-	p.cond.L.Lock()
-	p.size--
-	p.cond.L.Unlock()
-
 	// The best we can do if CloseSession fails is assume that it is closed
 	// regardless.
-	defer p.cond.Signal()
+	defer func() {
+		select {
+		// refill the session channel or stop if pool is closed
+		case p.sessionChan <- struct{}{}:
+		case <-p.closeContext.Done():
+		}
+		p.wg.Done()
+	}()
 	return pkcs11Error("CloseSession", p.slot.CloseSession(session))
 }
 
 // close marks the pool as closed and waits for all sessions to be returned via
 // [pool.put], then closes the underlying slot.
 func (p *pool) close() error {
-	// Close the pool:
-	p.cond.L.Lock()
-	defer p.cond.L.Unlock()
-	if p.closed {
-		// This makes close() idempotent, just for safety.
-		return nil
-	}
-	p.closed = true
+	// Signal to close the pool:
+	p.closeFunc()
 
-	// Then drain it:
-	for p.size != 0 {
-		p.cond.Wait()
-	}
+	// Then wait for all sessions to finish
+	p.wg.Wait()
 
 	return errors.Join(
 		pkcs11Error("Logout", p.slot.Logout(p.persistent)),
