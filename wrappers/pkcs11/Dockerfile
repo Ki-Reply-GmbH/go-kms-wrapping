@@ -35,6 +35,9 @@ EOF
 WORKDIR /go-kms-wrapping
 COPY ./go.mod ./go.sum ./
 
+WORKDIR /go-kms-wrapping/kms/pkcs11
+COPY ./kms/pkcs11/go.mod ./wrappers/pkcs11/go.sum ./
+
 WORKDIR /go-kms-wrapping/wrappers/pkcs11
 COPY ./wrappers/pkcs11/go.mod ./wrappers/pkcs11/go.sum ./
 

@@ -6,14 +6,27 @@ package pkcs11
 
 import (
 	wrapping "github.com/openbao/go-kms-wrapping/v2"
+	"github.com/openbao/openbao/api/v2"
 )
 
-// getOpts iterates the inbound Options and returns a struct
+const (
+	EnvLib                = "BAO_HSM_LIB"
+	EnvSlot               = "BAO_HSM_SLOT"
+	EnvTokenLabel         = "BAO_HSM_TOKEN_LABEL"
+	EnvPin                = "BAO_HSM_PIN"
+	EnvMaxParallel        = "BAO_HSM_MAX_PARALLEL"
+	EnvKeyId              = "BAO_HSM_KEY_ID"
+	EnvKeyLabel           = "BAO_HSM_KEY_LABEL"
+	EnvMechanism          = "BAO_HSM_MECHANISM"
+	EnvRsaOaepHash        = "BAO_HSM_RSA_OAEP_HASH"
+	EnvSoftwareEncryption = "BAO_HSM_SOFTWARE_ENCRYPTION"
+)
+
 func getOpts(opt ...wrapping.Option) (*options, error) {
-	// First, separate out options into local and global
-	opts := getDefaultOptions()
+	// First, separate out options into local and global.
 	var wrappingOptions []wrapping.Option
 	var localOptions []OptionFunc
+
 	for _, o := range opt {
 		if o == nil {
 			continue
@@ -27,36 +40,37 @@ func getOpts(opt ...wrapping.Option) (*options, error) {
 		}
 	}
 
-	// Parse the global options
+	var opts options
+
+	// Parse the global options.
 	var err error
 	opts.Options, err = wrapping.GetOpts(wrappingOptions...)
 	if err != nil {
 		return nil, err
 	}
 
-	// Don't ever return blank options
+	// Don't ever return blank options.
 	if opts.Options == nil {
 		opts.Options = new(wrapping.Options)
 	}
 
-	// Local options can be provided either via the WithConfigMap field
-	// (for over the plugin barrier or embedding) or via local option functions
-	// (for embedding). First pull from the option.
+	// Local options can be provided either via the WithConfigMap field (for
+	// over the plugin barrier or embedding) or via local option functions (for
+	// embedding). First pull from the config map.
 	if opts.WithConfigMap != nil {
 		for k, v := range opts.WithConfigMap {
 			switch k {
-			// case "key_id", "kms_key_id": // deprecated backend-specific value, set global
-			case "key_id":
-				opts.withKeyId = v
-			case "slot":
-				opts.withSlot = v
+			case "lib":
+				opts.withLib = v
 			case "pin":
 				opts.withPin = v
-			case "lib", "module":
-				opts.withLib = v
-			case "token", "token_label":
+			case "slot":
+				opts.withSlot = v
+			case "token_label":
 				opts.withTokenLabel = v
-			case "label", "key_label":
+			case "key_id":
+				opts.withKeyId = v
+			case "key_label":
 				opts.withKeyLabel = v
 			case "mechanism":
 				opts.withMechanism = v
@@ -85,31 +99,62 @@ func getOpts(opt ...wrapping.Option) (*options, error) {
 	return &opts, nil
 }
 
-// OptionFunc holds a function with local options
+func mergeOptionsWithEnv(opts *options) {
+	if env := api.ReadBaoVariable(EnvLib); env != "" {
+		opts.withLib = env
+	}
+	if env := api.ReadBaoVariable(EnvPin); env != "" {
+		opts.withPin = env
+	}
+	if env := api.ReadBaoVariable(EnvSlot); env != "" {
+		opts.withSlot = env
+	}
+	if env := api.ReadBaoVariable(EnvTokenLabel); env != "" {
+		opts.withTokenLabel = env
+	}
+	if env := api.ReadBaoVariable(EnvKeyId); env != "" {
+		opts.withKeyId = env
+	}
+	if env := api.ReadBaoVariable(EnvKeyLabel); env != "" {
+		opts.withKeyLabel = env
+	}
+	if env := api.ReadBaoVariable(EnvMechanism); env != "" {
+		opts.withMechanism = env
+	}
+	if env := api.ReadBaoVariable(EnvRsaOaepHash); env != "" {
+		opts.withRsaOaepHash = env
+	}
+	if env := api.ReadBaoVariable(EnvSoftwareEncryption); env != "" {
+		opts.withDisableSoftwareEncryption = env
+	}
+}
+
+// OptionFunc holds a function  local options.
 type OptionFunc func(*options) error
 
-// options = how options are represented
+// options are local options.
 type options struct {
 	*wrapping.Options
 
-	withSlot                      string
-	withPin                       string
-	withLib                       string
-	withKeyId                     string
-	withKeyLabel                  string
-	withTokenLabel                string
+	// Provider-specific:
+	withLib        string
+	withPin        string
+	withSlot       string
+	withTokenLabel string
+
+	// Key-specific:
+	withKeyId    string
+	withKeyLabel string
+
+	// Mechanism-specific:
 	withMechanism                 string
 	withRsaOaepHash               string
 	withDisableSoftwareEncryption string
 }
 
-func getDefaultOptions() options {
-	return options{}
-}
-
-// WithSlot sets the slot
+// WithSlot sets the token slot number.
 func WithSlot(slot string) wrapping.Option {
-	return func() interface{} {
+	return func() any {
 		return OptionFunc(func(o *options) error {
 			o.withSlot = slot
 			return nil
@@ -117,9 +162,9 @@ func WithSlot(slot string) wrapping.Option {
 	}
 }
 
-// WithSlot sets the slot
+// WithSlot sets the token label.
 func WithTokenLabel(slot string) wrapping.Option {
-	return func() interface{} {
+	return func() any {
 		return OptionFunc(func(o *options) error {
 			o.withTokenLabel = slot
 			return nil
@@ -127,9 +172,9 @@ func WithTokenLabel(slot string) wrapping.Option {
 	}
 }
 
-// WithPin sets the pin
+// WithPin sets the pin.
 func WithPin(pin string) wrapping.Option {
-	return func() interface{} {
+	return func() any {
 		return OptionFunc(func(o *options) error {
 			o.withPin = pin
 			return nil
@@ -137,9 +182,9 @@ func WithPin(pin string) wrapping.Option {
 	}
 }
 
-// WithLib sets the module
+// WithLib sets the dynamic library path.
 func WithLib(lib string) wrapping.Option {
-	return func() interface{} {
+	return func() any {
 		return OptionFunc(func(o *options) error {
 			o.withLib = lib
 			return nil
@@ -147,9 +192,9 @@ func WithLib(lib string) wrapping.Option {
 	}
 }
 
-// WithLabel sets the label
+// WithLabel sets the key ID (CKA_ID).
 func WithKeyId(keyId string) wrapping.Option {
-	return func() interface{} {
+	return func() any {
 		return OptionFunc(func(o *options) error {
 			o.withKeyId = keyId
 			return nil
@@ -157,9 +202,9 @@ func WithKeyId(keyId string) wrapping.Option {
 	}
 }
 
-// WithLabel sets the label
+// WithLabel sets the key label (CKA_LABEL).
 func WithKeyLabel(label string) wrapping.Option {
-	return func() interface{} {
+	return func() any {
 		return OptionFunc(func(o *options) error {
 			o.withKeyLabel = label
 			return nil
@@ -167,9 +212,9 @@ func WithKeyLabel(label string) wrapping.Option {
 	}
 }
 
-// WithMechanism sets the mechanism
+// WithMechanism sets the mechanism (CKM_X).
 func WithMechanism(mechanism string) wrapping.Option {
-	return func() interface{} {
+	return func() any {
 		return OptionFunc(func(o *options) error {
 			o.withMechanism = mechanism
 			return nil
@@ -177,9 +222,9 @@ func WithMechanism(mechanism string) wrapping.Option {
 	}
 }
 
-// WithRsaOaepHash sets the RSA OAEP Hash mechanism
+// WithRsaOaepHash sets the RSA-OAEP hash mechanism.
 func WithRsaOaepHash(hashMechanisme string) wrapping.Option {
-	return func() interface{} {
+	return func() any {
 		return OptionFunc(func(o *options) error {
 			o.withRsaOaepHash = hashMechanisme
 			return nil
