@@ -17,8 +17,9 @@ import (
 )
 
 func TestStore(t *testing.T) {
+	hsm := softhsm.New(t)
+
 	t.Run("NewKeyStore", func(t *testing.T) {
-		hsm := softhsm.New(t)
 		label, _ := hsm.InitToken()
 
 		// Open the module separately to find the token slot ID.
@@ -104,7 +105,6 @@ func TestStore(t *testing.T) {
 	})
 
 	t.Run("ListKeys", func(t *testing.T) {
-		hsm := softhsm.New(t)
 		label, pin := hsm.InitToken()
 
 		// Store setup:
@@ -189,7 +189,6 @@ func TestStore(t *testing.T) {
 	})
 
 	t.Run("GetKey", func(t *testing.T) {
-		hsm := softhsm.New(t)
 		label, pin := hsm.InitToken()
 
 		// Store setup:

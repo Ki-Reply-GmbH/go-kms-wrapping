@@ -25,7 +25,7 @@ type SoftHSM struct {
 }
 
 // New creates a new SoftHSM test.
-func New(t *testing.T) *SoftHSM {
+func NewSoftHSM(t *testing.T) *SoftHSM {
 	t.Helper()
 
 	if yes, err := strconv.ParseBool(os.Getenv("SOFTHSM_TESTS")); err != nil || !yes {

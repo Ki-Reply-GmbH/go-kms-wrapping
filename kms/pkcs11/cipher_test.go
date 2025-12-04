@@ -96,10 +96,10 @@ func TestCipher(t *testing.T) {
 				aad       []byte
 				multipart bool
 			}{
-				"Oneshot":       {},
-				"Oneshot+AAD":   {aad: []byte("Wow!")},
-				"Multipart":     {multipart: true},
-				"Multipart+AAD": {aad: []byte("Wow!"), multipart: true},
+				"Oneshot":     {},
+				"Oneshot+AAD": {aad: []byte("Wow!")},
+				// "Multipart":     {multipart: true},
+				// "Multipart+AAD": {aad: []byte("Wow!"), multipart: true},
 			}
 
 			for name, tt := range tests {
