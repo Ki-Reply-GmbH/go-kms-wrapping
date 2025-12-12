@@ -11,10 +11,8 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
-	"testing"
 
 	"github.com/miekg/pkcs11"
-	"github.com/stretchr/testify/require"
 )
 
 type module struct {
@@ -138,21 +136,6 @@ func (r *Ref) Drop() error {
 	delete(cache, r.path)
 
 	return err
-}
-
-// TestOpen is a test helper that opens and automatically drops a module on test
-// completion, handling all errors.
-func TestOpen(t *testing.T, path string) *Ref {
-	t.Helper()
-
-	mod, err := Open(path)
-	require.NoError(t, err)
-
-	t.Cleanup(func() {
-		require.NoError(t, mod.Drop())
-	})
-
-	return mod
 }
 
 // Path returns the module's dynamic library path.
