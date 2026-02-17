@@ -11,8 +11,6 @@ import (
 	"github.com/hashicorp/go-uuid"
 	"github.com/openbao/go-kms-wrapping/plugin/v2/pb"
 	"github.com/openbao/go-kms-wrapping/v2"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 // ErrNoInstance is returned when an RPC is called on a remote object that
@@ -174,20 +172,4 @@ func (ws *gRPCWrapperServer) Finalize(ctx context.Context, req *pb.FinalizeReque
 	ws.instancesLock.Unlock()
 
 	return &pb.FinalizeResponse{}, nil
-}
-
-func (ws *gRPCWrapperServer) KeyBytes(ctx context.Context, req *pb.KeyBytesRequest) (*pb.KeyBytesResponse, error) {
-	wrapper, err := ws.get(req.WrapperId)
-	if err != nil {
-		return nil, err
-	}
-	keyExporter, ok := wrapper.(wrapping.KeyExporter)
-	if !ok {
-		return nil, status.Error(codes.Unimplemented, "this Wrapper does not implement KeyExporter")
-	}
-	keyBytes, err := keyExporter.KeyBytes(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return &pb.KeyBytesResponse{KeyBytes: keyBytes}, nil
 }

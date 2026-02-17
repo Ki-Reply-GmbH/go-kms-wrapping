@@ -65,13 +65,6 @@ message FinalizeRequest {
 }
 message FinalizeResponse {}
 
-message KeyBytesRequest {
-  string wrapper_id = 1;
-}
-message KeyBytesResponse {
-  bytes key_bytes = 10 [json_name = "key_bytes"];
-}
-
 service Wrapper {
   rpc Factory(FactoryRequest) returns (FactoryResponse);
   rpc Type(TypeRequest) returns (TypeResponse);
@@ -81,5 +74,4 @@ service Wrapper {
   rpc Decrypt(DecryptRequest) returns (DecryptResponse);
   rpc Init(InitRequest) returns (InitResponse);
   rpc Finalize(FinalizeRequest) returns (FinalizeResponse);
-  rpc KeyBytes(KeyBytesRequest) returns (KeyBytesResponse);
 }

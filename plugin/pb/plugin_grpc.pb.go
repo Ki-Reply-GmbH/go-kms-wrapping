@@ -30,7 +30,6 @@ const (
 	Wrapper_Decrypt_FullMethodName   = "/pb.Wrapper/Decrypt"
 	Wrapper_Init_FullMethodName      = "/pb.Wrapper/Init"
 	Wrapper_Finalize_FullMethodName  = "/pb.Wrapper/Finalize"
-	Wrapper_KeyBytes_FullMethodName  = "/pb.Wrapper/KeyBytes"
 )
 
 // WrapperClient is the client API for Wrapper service.
@@ -45,7 +44,6 @@ type WrapperClient interface {
 	Decrypt(ctx context.Context, in *DecryptRequest, opts ...grpc.CallOption) (*DecryptResponse, error)
 	Init(ctx context.Context, in *InitRequest, opts ...grpc.CallOption) (*InitResponse, error)
 	Finalize(ctx context.Context, in *FinalizeRequest, opts ...grpc.CallOption) (*FinalizeResponse, error)
-	KeyBytes(ctx context.Context, in *KeyBytesRequest, opts ...grpc.CallOption) (*KeyBytesResponse, error)
 }
 
 type wrapperClient struct {
@@ -136,16 +134,6 @@ func (c *wrapperClient) Finalize(ctx context.Context, in *FinalizeRequest, opts 
 	return out, nil
 }
 
-func (c *wrapperClient) KeyBytes(ctx context.Context, in *KeyBytesRequest, opts ...grpc.CallOption) (*KeyBytesResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(KeyBytesResponse)
-	err := c.cc.Invoke(ctx, Wrapper_KeyBytes_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // WrapperServer is the server API for Wrapper service.
 // All implementations must embed UnimplementedWrapperServer
 // for forward compatibility.
@@ -158,7 +146,6 @@ type WrapperServer interface {
 	Decrypt(context.Context, *DecryptRequest) (*DecryptResponse, error)
 	Init(context.Context, *InitRequest) (*InitResponse, error)
 	Finalize(context.Context, *FinalizeRequest) (*FinalizeResponse, error)
-	KeyBytes(context.Context, *KeyBytesRequest) (*KeyBytesResponse, error)
 	mustEmbedUnimplementedWrapperServer()
 }
 
@@ -192,9 +179,6 @@ func (UnimplementedWrapperServer) Init(context.Context, *InitRequest) (*InitResp
 }
 func (UnimplementedWrapperServer) Finalize(context.Context, *FinalizeRequest) (*FinalizeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Finalize not implemented")
-}
-func (UnimplementedWrapperServer) KeyBytes(context.Context, *KeyBytesRequest) (*KeyBytesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method KeyBytes not implemented")
 }
 func (UnimplementedWrapperServer) mustEmbedUnimplementedWrapperServer() {}
 func (UnimplementedWrapperServer) testEmbeddedByValue()                 {}
@@ -361,24 +345,6 @@ func _Wrapper_Finalize_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Wrapper_KeyBytes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(KeyBytesRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(WrapperServer).KeyBytes(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Wrapper_KeyBytes_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(WrapperServer).KeyBytes(ctx, req.(*KeyBytesRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // Wrapper_ServiceDesc is the grpc.ServiceDesc for Wrapper service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -417,10 +383,6 @@ var Wrapper_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Finalize",
 			Handler:    _Wrapper_Finalize_Handler,
-		},
-		{
-			MethodName: "KeyBytes",
-			Handler:    _Wrapper_KeyBytes_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

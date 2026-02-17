@@ -8,14 +8,11 @@ import (
 
 	"github.com/openbao/go-kms-wrapping/plugin/v2/pb"
 	"github.com/openbao/go-kms-wrapping/v2"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 var (
 	_ wrapping.Wrapper       = (*gRPCWrapperClient)(nil)
 	_ wrapping.InitFinalizer = (*gRPCWrapperClient)(nil)
-	_ wrapping.KeyExporter   = (*gRPCWrapperClient)(nil)
 )
 
 type gRPCWrapperClient struct {
@@ -108,16 +105,4 @@ func (wc *gRPCWrapperClient) Finalize(ctx context.Context, options ...wrapping.O
 		WrapperId: wc.id,
 	})
 	return err
-}
-
-func (wc *gRPCWrapperClient) KeyBytes(ctx context.Context) ([]byte, error) {
-	resp, err := wc.client.KeyBytes(ctx, &pb.KeyBytesRequest{WrapperId: wc.id})
-	switch {
-	case err == nil:
-	case status.Code(err) == codes.Unimplemented:
-		return nil, wrapping.ErrFunctionNotImplemented
-	default:
-		return nil, err
-	}
-	return resp.KeyBytes, nil
 }

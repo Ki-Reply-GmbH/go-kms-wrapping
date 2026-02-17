@@ -761,94 +761,6 @@ func (*FinalizeResponse) Descriptor() ([]byte, []int) {
 	return file_plugin_pb_plugin_proto_rawDescGZIP(), []int{15}
 }
 
-type KeyBytesRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	WrapperId     string                 `protobuf:"bytes,1,opt,name=wrapper_id,json=wrapperId,proto3" json:"wrapper_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *KeyBytesRequest) Reset() {
-	*x = KeyBytesRequest{}
-	mi := &file_plugin_pb_plugin_proto_msgTypes[16]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *KeyBytesRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*KeyBytesRequest) ProtoMessage() {}
-
-func (x *KeyBytesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_plugin_pb_plugin_proto_msgTypes[16]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use KeyBytesRequest.ProtoReflect.Descriptor instead.
-func (*KeyBytesRequest) Descriptor() ([]byte, []int) {
-	return file_plugin_pb_plugin_proto_rawDescGZIP(), []int{16}
-}
-
-func (x *KeyBytesRequest) GetWrapperId() string {
-	if x != nil {
-		return x.WrapperId
-	}
-	return ""
-}
-
-type KeyBytesResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	KeyBytes      []byte                 `protobuf:"bytes,10,opt,name=key_bytes,proto3" json:"key_bytes,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *KeyBytesResponse) Reset() {
-	*x = KeyBytesResponse{}
-	mi := &file_plugin_pb_plugin_proto_msgTypes[17]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *KeyBytesResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*KeyBytesResponse) ProtoMessage() {}
-
-func (x *KeyBytesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_plugin_pb_plugin_proto_msgTypes[17]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use KeyBytesResponse.ProtoReflect.Descriptor instead.
-func (*KeyBytesResponse) Descriptor() ([]byte, []int) {
-	return file_plugin_pb_plugin_proto_rawDescGZIP(), []int{17}
-}
-
-func (x *KeyBytesResponse) GetKeyBytes() []byte {
-	if x != nil {
-		return x.KeyBytes
-	}
-	return nil
-}
-
 var File_plugin_pb_plugin_proto protoreflect.FileDescriptor
 
 const file_plugin_pb_plugin_proto_rawDesc = "" +
@@ -908,13 +820,7 @@ const file_plugin_pb_plugin_proto_rawDesc = "" +
 	"\n" +
 	"wrapper_id\x18\x01 \x01(\tR\twrapperId\x12+\n" +
 	"\aoptions\x18\x14 \x01(\v2\x11.wrapping.OptionsR\aoptions\"\x12\n" +
-	"\x10FinalizeResponse\"0\n" +
-	"\x0fKeyBytesRequest\x12\x1d\n" +
-	"\n" +
-	"wrapper_id\x18\x01 \x01(\tR\twrapperId\"0\n" +
-	"\x10KeyBytesResponse\x12\x1c\n" +
-	"\tkey_bytes\x18\n" +
-	" \x01(\fR\tkey_bytes2\xd1\x03\n" +
+	"\x10FinalizeResponse2\x9a\x03\n" +
 	"\aWrapper\x122\n" +
 	"\aFactory\x12\x12.pb.FactoryRequest\x1a\x13.pb.FactoryResponse\x12)\n" +
 	"\x04Type\x12\x0f.pb.TypeRequest\x1a\x10.pb.TypeResponse\x12,\n" +
@@ -923,8 +829,7 @@ const file_plugin_pb_plugin_proto_rawDesc = "" +
 	"\aEncrypt\x12\x12.pb.EncryptRequest\x1a\x13.pb.EncryptResponse\x122\n" +
 	"\aDecrypt\x12\x12.pb.DecryptRequest\x1a\x13.pb.DecryptResponse\x12)\n" +
 	"\x04Init\x12\x0f.pb.InitRequest\x1a\x10.pb.InitResponse\x125\n" +
-	"\bFinalize\x12\x13.pb.FinalizeRequest\x1a\x14.pb.FinalizeResponse\x125\n" +
-	"\bKeyBytes\x12\x13.pb.KeyBytesRequest\x1a\x14.pb.KeyBytesResponseB1Z/github.com/openbao/go-kms-wrapping/plugin/v2/pbb\x06proto3"
+	"\bFinalize\x12\x13.pb.FinalizeRequest\x1a\x14.pb.FinalizeResponseB1Z/github.com/openbao/go-kms-wrapping/plugin/v2/pbb\x06proto3"
 
 var (
 	file_plugin_pb_plugin_proto_rawDescOnce sync.Once
@@ -938,7 +843,7 @@ func file_plugin_pb_plugin_proto_rawDescGZIP() []byte {
 	return file_plugin_pb_plugin_proto_rawDescData
 }
 
-var file_plugin_pb_plugin_proto_msgTypes = make([]protoimpl.MessageInfo, 18)
+var file_plugin_pb_plugin_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
 var file_plugin_pb_plugin_proto_goTypes = []any{
 	(*FactoryRequest)(nil),    // 0: pb.FactoryRequest
 	(*FactoryResponse)(nil),   // 1: pb.FactoryResponse
@@ -956,21 +861,19 @@ var file_plugin_pb_plugin_proto_goTypes = []any{
 	(*InitResponse)(nil),      // 13: pb.InitResponse
 	(*FinalizeRequest)(nil),   // 14: pb.FinalizeRequest
 	(*FinalizeResponse)(nil),  // 15: pb.FinalizeResponse
-	(*KeyBytesRequest)(nil),   // 16: pb.KeyBytesRequest
-	(*KeyBytesResponse)(nil),  // 17: pb.KeyBytesResponse
-	(*v2.Options)(nil),        // 18: wrapping.Options
-	(*v2.WrapperConfig)(nil),  // 19: wrapping.WrapperConfig
-	(*v2.BlobInfo)(nil),       // 20: wrapping.BlobInfo
+	(*v2.Options)(nil),        // 16: wrapping.Options
+	(*v2.WrapperConfig)(nil),  // 17: wrapping.WrapperConfig
+	(*v2.BlobInfo)(nil),       // 18: wrapping.BlobInfo
 }
 var file_plugin_pb_plugin_proto_depIdxs = []int32{
-	18, // 0: pb.SetConfigRequest.options:type_name -> wrapping.Options
-	19, // 1: pb.SetConfigResponse.wrapper_config:type_name -> wrapping.WrapperConfig
-	18, // 2: pb.EncryptRequest.options:type_name -> wrapping.Options
-	20, // 3: pb.EncryptResponse.ciphertext:type_name -> wrapping.BlobInfo
-	20, // 4: pb.DecryptRequest.ciphertext:type_name -> wrapping.BlobInfo
-	18, // 5: pb.DecryptRequest.options:type_name -> wrapping.Options
-	18, // 6: pb.InitRequest.options:type_name -> wrapping.Options
-	18, // 7: pb.FinalizeRequest.options:type_name -> wrapping.Options
+	16, // 0: pb.SetConfigRequest.options:type_name -> wrapping.Options
+	17, // 1: pb.SetConfigResponse.wrapper_config:type_name -> wrapping.WrapperConfig
+	16, // 2: pb.EncryptRequest.options:type_name -> wrapping.Options
+	18, // 3: pb.EncryptResponse.ciphertext:type_name -> wrapping.BlobInfo
+	18, // 4: pb.DecryptRequest.ciphertext:type_name -> wrapping.BlobInfo
+	16, // 5: pb.DecryptRequest.options:type_name -> wrapping.Options
+	16, // 6: pb.InitRequest.options:type_name -> wrapping.Options
+	16, // 7: pb.FinalizeRequest.options:type_name -> wrapping.Options
 	0,  // 8: pb.Wrapper.Factory:input_type -> pb.FactoryRequest
 	2,  // 9: pb.Wrapper.Type:input_type -> pb.TypeRequest
 	4,  // 10: pb.Wrapper.KeyId:input_type -> pb.KeyIdRequest
@@ -979,18 +882,16 @@ var file_plugin_pb_plugin_proto_depIdxs = []int32{
 	10, // 13: pb.Wrapper.Decrypt:input_type -> pb.DecryptRequest
 	12, // 14: pb.Wrapper.Init:input_type -> pb.InitRequest
 	14, // 15: pb.Wrapper.Finalize:input_type -> pb.FinalizeRequest
-	16, // 16: pb.Wrapper.KeyBytes:input_type -> pb.KeyBytesRequest
-	1,  // 17: pb.Wrapper.Factory:output_type -> pb.FactoryResponse
-	3,  // 18: pb.Wrapper.Type:output_type -> pb.TypeResponse
-	5,  // 19: pb.Wrapper.KeyId:output_type -> pb.KeyIdResponse
-	7,  // 20: pb.Wrapper.SetConfig:output_type -> pb.SetConfigResponse
-	9,  // 21: pb.Wrapper.Encrypt:output_type -> pb.EncryptResponse
-	11, // 22: pb.Wrapper.Decrypt:output_type -> pb.DecryptResponse
-	13, // 23: pb.Wrapper.Init:output_type -> pb.InitResponse
-	15, // 24: pb.Wrapper.Finalize:output_type -> pb.FinalizeResponse
-	17, // 25: pb.Wrapper.KeyBytes:output_type -> pb.KeyBytesResponse
-	17, // [17:26] is the sub-list for method output_type
-	8,  // [8:17] is the sub-list for method input_type
+	1,  // 16: pb.Wrapper.Factory:output_type -> pb.FactoryResponse
+	3,  // 17: pb.Wrapper.Type:output_type -> pb.TypeResponse
+	5,  // 18: pb.Wrapper.KeyId:output_type -> pb.KeyIdResponse
+	7,  // 19: pb.Wrapper.SetConfig:output_type -> pb.SetConfigResponse
+	9,  // 20: pb.Wrapper.Encrypt:output_type -> pb.EncryptResponse
+	11, // 21: pb.Wrapper.Decrypt:output_type -> pb.DecryptResponse
+	13, // 22: pb.Wrapper.Init:output_type -> pb.InitResponse
+	15, // 23: pb.Wrapper.Finalize:output_type -> pb.FinalizeResponse
+	16, // [16:24] is the sub-list for method output_type
+	8,  // [8:16] is the sub-list for method input_type
 	8,  // [8:8] is the sub-list for extension type_name
 	8,  // [8:8] is the sub-list for extension extendee
 	0,  // [0:8] is the sub-list for field type_name
@@ -1007,7 +908,7 @@ func file_plugin_pb_plugin_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_plugin_pb_plugin_proto_rawDesc), len(file_plugin_pb_plugin_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   18,
+			NumMessages:   16,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
