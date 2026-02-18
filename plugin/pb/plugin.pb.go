@@ -25,15 +25,96 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type FactoryRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *FactoryRequest) Reset() {
+	*x = FactoryRequest{}
+	mi := &file_plugin_pb_plugin_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *FactoryRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FactoryRequest) ProtoMessage() {}
+
+func (x *FactoryRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_plugin_pb_plugin_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use FactoryRequest.ProtoReflect.Descriptor instead.
+func (*FactoryRequest) Descriptor() ([]byte, []int) {
+	return file_plugin_pb_plugin_proto_rawDescGZIP(), []int{0}
+}
+
+type FactoryResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	WrapperId     string                 `protobuf:"bytes,1,opt,name=wrapper_id,json=wrapperId,proto3" json:"wrapper_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *FactoryResponse) Reset() {
+	*x = FactoryResponse{}
+	mi := &file_plugin_pb_plugin_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *FactoryResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FactoryResponse) ProtoMessage() {}
+
+func (x *FactoryResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_plugin_pb_plugin_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use FactoryResponse.ProtoReflect.Descriptor instead.
+func (*FactoryResponse) Descriptor() ([]byte, []int) {
+	return file_plugin_pb_plugin_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *FactoryResponse) GetWrapperId() string {
+	if x != nil {
+		return x.WrapperId
+	}
+	return ""
+}
+
 type TypeRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	WrapperId     string                 `protobuf:"bytes,1,opt,name=wrapper_id,json=wrapperId,proto3" json:"wrapper_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *TypeRequest) Reset() {
 	*x = TypeRequest{}
-	mi := &file_plugin_pb_plugin_proto_msgTypes[0]
+	mi := &file_plugin_pb_plugin_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -45,7 +126,7 @@ func (x *TypeRequest) String() string {
 func (*TypeRequest) ProtoMessage() {}
 
 func (x *TypeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_plugin_pb_plugin_proto_msgTypes[0]
+	mi := &file_plugin_pb_plugin_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -58,7 +139,14 @@ func (x *TypeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TypeRequest.ProtoReflect.Descriptor instead.
 func (*TypeRequest) Descriptor() ([]byte, []int) {
-	return file_plugin_pb_plugin_proto_rawDescGZIP(), []int{0}
+	return file_plugin_pb_plugin_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *TypeRequest) GetWrapperId() string {
+	if x != nil {
+		return x.WrapperId
+	}
+	return ""
 }
 
 type TypeResponse struct {
@@ -70,7 +158,7 @@ type TypeResponse struct {
 
 func (x *TypeResponse) Reset() {
 	*x = TypeResponse{}
-	mi := &file_plugin_pb_plugin_proto_msgTypes[1]
+	mi := &file_plugin_pb_plugin_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -82,7 +170,7 @@ func (x *TypeResponse) String() string {
 func (*TypeResponse) ProtoMessage() {}
 
 func (x *TypeResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_plugin_pb_plugin_proto_msgTypes[1]
+	mi := &file_plugin_pb_plugin_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -95,7 +183,7 @@ func (x *TypeResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TypeResponse.ProtoReflect.Descriptor instead.
 func (*TypeResponse) Descriptor() ([]byte, []int) {
-	return file_plugin_pb_plugin_proto_rawDescGZIP(), []int{1}
+	return file_plugin_pb_plugin_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *TypeResponse) GetType() string {
@@ -107,13 +195,14 @@ func (x *TypeResponse) GetType() string {
 
 type KeyIdRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	WrapperId     string                 `protobuf:"bytes,1,opt,name=wrapper_id,json=wrapperId,proto3" json:"wrapper_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *KeyIdRequest) Reset() {
 	*x = KeyIdRequest{}
-	mi := &file_plugin_pb_plugin_proto_msgTypes[2]
+	mi := &file_plugin_pb_plugin_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -125,7 +214,7 @@ func (x *KeyIdRequest) String() string {
 func (*KeyIdRequest) ProtoMessage() {}
 
 func (x *KeyIdRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_plugin_pb_plugin_proto_msgTypes[2]
+	mi := &file_plugin_pb_plugin_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -138,7 +227,14 @@ func (x *KeyIdRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use KeyIdRequest.ProtoReflect.Descriptor instead.
 func (*KeyIdRequest) Descriptor() ([]byte, []int) {
-	return file_plugin_pb_plugin_proto_rawDescGZIP(), []int{2}
+	return file_plugin_pb_plugin_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *KeyIdRequest) GetWrapperId() string {
+	if x != nil {
+		return x.WrapperId
+	}
+	return ""
 }
 
 type KeyIdResponse struct {
@@ -150,7 +246,7 @@ type KeyIdResponse struct {
 
 func (x *KeyIdResponse) Reset() {
 	*x = KeyIdResponse{}
-	mi := &file_plugin_pb_plugin_proto_msgTypes[3]
+	mi := &file_plugin_pb_plugin_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -162,7 +258,7 @@ func (x *KeyIdResponse) String() string {
 func (*KeyIdResponse) ProtoMessage() {}
 
 func (x *KeyIdResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_plugin_pb_plugin_proto_msgTypes[3]
+	mi := &file_plugin_pb_plugin_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -175,7 +271,7 @@ func (x *KeyIdResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use KeyIdResponse.ProtoReflect.Descriptor instead.
 func (*KeyIdResponse) Descriptor() ([]byte, []int) {
-	return file_plugin_pb_plugin_proto_rawDescGZIP(), []int{3}
+	return file_plugin_pb_plugin_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *KeyIdResponse) GetKeyId() string {
@@ -187,6 +283,7 @@ func (x *KeyIdResponse) GetKeyId() string {
 
 type SetConfigRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	WrapperId     string                 `protobuf:"bytes,1,opt,name=wrapper_id,json=wrapperId,proto3" json:"wrapper_id,omitempty"`
 	Options       *v2.Options            `protobuf:"bytes,20,opt,name=options,proto3" json:"options,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -194,7 +291,7 @@ type SetConfigRequest struct {
 
 func (x *SetConfigRequest) Reset() {
 	*x = SetConfigRequest{}
-	mi := &file_plugin_pb_plugin_proto_msgTypes[4]
+	mi := &file_plugin_pb_plugin_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -206,7 +303,7 @@ func (x *SetConfigRequest) String() string {
 func (*SetConfigRequest) ProtoMessage() {}
 
 func (x *SetConfigRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_plugin_pb_plugin_proto_msgTypes[4]
+	mi := &file_plugin_pb_plugin_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -219,7 +316,14 @@ func (x *SetConfigRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetConfigRequest.ProtoReflect.Descriptor instead.
 func (*SetConfigRequest) Descriptor() ([]byte, []int) {
-	return file_plugin_pb_plugin_proto_rawDescGZIP(), []int{4}
+	return file_plugin_pb_plugin_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *SetConfigRequest) GetWrapperId() string {
+	if x != nil {
+		return x.WrapperId
+	}
+	return ""
 }
 
 func (x *SetConfigRequest) GetOptions() *v2.Options {
@@ -238,7 +342,7 @@ type SetConfigResponse struct {
 
 func (x *SetConfigResponse) Reset() {
 	*x = SetConfigResponse{}
-	mi := &file_plugin_pb_plugin_proto_msgTypes[5]
+	mi := &file_plugin_pb_plugin_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -250,7 +354,7 @@ func (x *SetConfigResponse) String() string {
 func (*SetConfigResponse) ProtoMessage() {}
 
 func (x *SetConfigResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_plugin_pb_plugin_proto_msgTypes[5]
+	mi := &file_plugin_pb_plugin_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -263,7 +367,7 @@ func (x *SetConfigResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetConfigResponse.ProtoReflect.Descriptor instead.
 func (*SetConfigResponse) Descriptor() ([]byte, []int) {
-	return file_plugin_pb_plugin_proto_rawDescGZIP(), []int{5}
+	return file_plugin_pb_plugin_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *SetConfigResponse) GetWrapperConfig() *v2.WrapperConfig {
@@ -275,6 +379,7 @@ func (x *SetConfigResponse) GetWrapperConfig() *v2.WrapperConfig {
 
 type EncryptRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	WrapperId     string                 `protobuf:"bytes,1,opt,name=wrapper_id,json=wrapperId,proto3" json:"wrapper_id,omitempty"`
 	Plaintext     []byte                 `protobuf:"bytes,10,opt,name=plaintext,proto3" json:"plaintext,omitempty"`
 	Options       *v2.Options            `protobuf:"bytes,20,opt,name=options,proto3" json:"options,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -283,7 +388,7 @@ type EncryptRequest struct {
 
 func (x *EncryptRequest) Reset() {
 	*x = EncryptRequest{}
-	mi := &file_plugin_pb_plugin_proto_msgTypes[6]
+	mi := &file_plugin_pb_plugin_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -295,7 +400,7 @@ func (x *EncryptRequest) String() string {
 func (*EncryptRequest) ProtoMessage() {}
 
 func (x *EncryptRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_plugin_pb_plugin_proto_msgTypes[6]
+	mi := &file_plugin_pb_plugin_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -308,7 +413,14 @@ func (x *EncryptRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EncryptRequest.ProtoReflect.Descriptor instead.
 func (*EncryptRequest) Descriptor() ([]byte, []int) {
-	return file_plugin_pb_plugin_proto_rawDescGZIP(), []int{6}
+	return file_plugin_pb_plugin_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *EncryptRequest) GetWrapperId() string {
+	if x != nil {
+		return x.WrapperId
+	}
+	return ""
 }
 
 func (x *EncryptRequest) GetPlaintext() []byte {
@@ -334,7 +446,7 @@ type EncryptResponse struct {
 
 func (x *EncryptResponse) Reset() {
 	*x = EncryptResponse{}
-	mi := &file_plugin_pb_plugin_proto_msgTypes[7]
+	mi := &file_plugin_pb_plugin_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -346,7 +458,7 @@ func (x *EncryptResponse) String() string {
 func (*EncryptResponse) ProtoMessage() {}
 
 func (x *EncryptResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_plugin_pb_plugin_proto_msgTypes[7]
+	mi := &file_plugin_pb_plugin_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -359,7 +471,7 @@ func (x *EncryptResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EncryptResponse.ProtoReflect.Descriptor instead.
 func (*EncryptResponse) Descriptor() ([]byte, []int) {
-	return file_plugin_pb_plugin_proto_rawDescGZIP(), []int{7}
+	return file_plugin_pb_plugin_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *EncryptResponse) GetCiphertext() *v2.BlobInfo {
@@ -371,6 +483,7 @@ func (x *EncryptResponse) GetCiphertext() *v2.BlobInfo {
 
 type DecryptRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	WrapperId     string                 `protobuf:"bytes,1,opt,name=wrapper_id,json=wrapperId,proto3" json:"wrapper_id,omitempty"`
 	Ciphertext    *v2.BlobInfo           `protobuf:"bytes,10,opt,name=ciphertext,proto3" json:"ciphertext,omitempty"`
 	Options       *v2.Options            `protobuf:"bytes,20,opt,name=options,proto3" json:"options,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -379,7 +492,7 @@ type DecryptRequest struct {
 
 func (x *DecryptRequest) Reset() {
 	*x = DecryptRequest{}
-	mi := &file_plugin_pb_plugin_proto_msgTypes[8]
+	mi := &file_plugin_pb_plugin_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -391,7 +504,7 @@ func (x *DecryptRequest) String() string {
 func (*DecryptRequest) ProtoMessage() {}
 
 func (x *DecryptRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_plugin_pb_plugin_proto_msgTypes[8]
+	mi := &file_plugin_pb_plugin_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -404,7 +517,14 @@ func (x *DecryptRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DecryptRequest.ProtoReflect.Descriptor instead.
 func (*DecryptRequest) Descriptor() ([]byte, []int) {
-	return file_plugin_pb_plugin_proto_rawDescGZIP(), []int{8}
+	return file_plugin_pb_plugin_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *DecryptRequest) GetWrapperId() string {
+	if x != nil {
+		return x.WrapperId
+	}
+	return ""
 }
 
 func (x *DecryptRequest) GetCiphertext() *v2.BlobInfo {
@@ -430,7 +550,7 @@ type DecryptResponse struct {
 
 func (x *DecryptResponse) Reset() {
 	*x = DecryptResponse{}
-	mi := &file_plugin_pb_plugin_proto_msgTypes[9]
+	mi := &file_plugin_pb_plugin_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -442,7 +562,7 @@ func (x *DecryptResponse) String() string {
 func (*DecryptResponse) ProtoMessage() {}
 
 func (x *DecryptResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_plugin_pb_plugin_proto_msgTypes[9]
+	mi := &file_plugin_pb_plugin_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -455,7 +575,7 @@ func (x *DecryptResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DecryptResponse.ProtoReflect.Descriptor instead.
 func (*DecryptResponse) Descriptor() ([]byte, []int) {
-	return file_plugin_pb_plugin_proto_rawDescGZIP(), []int{9}
+	return file_plugin_pb_plugin_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *DecryptResponse) GetPlaintext() []byte {
@@ -467,6 +587,7 @@ func (x *DecryptResponse) GetPlaintext() []byte {
 
 type InitRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	WrapperId     string                 `protobuf:"bytes,1,opt,name=wrapper_id,json=wrapperId,proto3" json:"wrapper_id,omitempty"`
 	Options       *v2.Options            `protobuf:"bytes,20,opt,name=options,proto3" json:"options,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -474,7 +595,7 @@ type InitRequest struct {
 
 func (x *InitRequest) Reset() {
 	*x = InitRequest{}
-	mi := &file_plugin_pb_plugin_proto_msgTypes[10]
+	mi := &file_plugin_pb_plugin_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -486,7 +607,7 @@ func (x *InitRequest) String() string {
 func (*InitRequest) ProtoMessage() {}
 
 func (x *InitRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_plugin_pb_plugin_proto_msgTypes[10]
+	mi := &file_plugin_pb_plugin_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -499,7 +620,14 @@ func (x *InitRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use InitRequest.ProtoReflect.Descriptor instead.
 func (*InitRequest) Descriptor() ([]byte, []int) {
-	return file_plugin_pb_plugin_proto_rawDescGZIP(), []int{10}
+	return file_plugin_pb_plugin_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *InitRequest) GetWrapperId() string {
+	if x != nil {
+		return x.WrapperId
+	}
+	return ""
 }
 
 func (x *InitRequest) GetOptions() *v2.Options {
@@ -517,7 +645,7 @@ type InitResponse struct {
 
 func (x *InitResponse) Reset() {
 	*x = InitResponse{}
-	mi := &file_plugin_pb_plugin_proto_msgTypes[11]
+	mi := &file_plugin_pb_plugin_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -529,7 +657,7 @@ func (x *InitResponse) String() string {
 func (*InitResponse) ProtoMessage() {}
 
 func (x *InitResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_plugin_pb_plugin_proto_msgTypes[11]
+	mi := &file_plugin_pb_plugin_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -542,11 +670,12 @@ func (x *InitResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use InitResponse.ProtoReflect.Descriptor instead.
 func (*InitResponse) Descriptor() ([]byte, []int) {
-	return file_plugin_pb_plugin_proto_rawDescGZIP(), []int{11}
+	return file_plugin_pb_plugin_proto_rawDescGZIP(), []int{13}
 }
 
 type FinalizeRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	WrapperId     string                 `protobuf:"bytes,1,opt,name=wrapper_id,json=wrapperId,proto3" json:"wrapper_id,omitempty"`
 	Options       *v2.Options            `protobuf:"bytes,20,opt,name=options,proto3" json:"options,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -554,7 +683,7 @@ type FinalizeRequest struct {
 
 func (x *FinalizeRequest) Reset() {
 	*x = FinalizeRequest{}
-	mi := &file_plugin_pb_plugin_proto_msgTypes[12]
+	mi := &file_plugin_pb_plugin_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -566,7 +695,7 @@ func (x *FinalizeRequest) String() string {
 func (*FinalizeRequest) ProtoMessage() {}
 
 func (x *FinalizeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_plugin_pb_plugin_proto_msgTypes[12]
+	mi := &file_plugin_pb_plugin_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -579,7 +708,14 @@ func (x *FinalizeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FinalizeRequest.ProtoReflect.Descriptor instead.
 func (*FinalizeRequest) Descriptor() ([]byte, []int) {
-	return file_plugin_pb_plugin_proto_rawDescGZIP(), []int{12}
+	return file_plugin_pb_plugin_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *FinalizeRequest) GetWrapperId() string {
+	if x != nil {
+		return x.WrapperId
+	}
+	return ""
 }
 
 func (x *FinalizeRequest) GetOptions() *v2.Options {
@@ -597,7 +733,7 @@ type FinalizeResponse struct {
 
 func (x *FinalizeResponse) Reset() {
 	*x = FinalizeResponse{}
-	mi := &file_plugin_pb_plugin_proto_msgTypes[13]
+	mi := &file_plugin_pb_plugin_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -609,7 +745,7 @@ func (x *FinalizeResponse) String() string {
 func (*FinalizeResponse) ProtoMessage() {}
 
 func (x *FinalizeResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_plugin_pb_plugin_proto_msgTypes[13]
+	mi := &file_plugin_pb_plugin_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -622,18 +758,19 @@ func (x *FinalizeResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FinalizeResponse.ProtoReflect.Descriptor instead.
 func (*FinalizeResponse) Descriptor() ([]byte, []int) {
-	return file_plugin_pb_plugin_proto_rawDescGZIP(), []int{13}
+	return file_plugin_pb_plugin_proto_rawDescGZIP(), []int{15}
 }
 
 type KeyBytesRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	WrapperId     string                 `protobuf:"bytes,1,opt,name=wrapper_id,json=wrapperId,proto3" json:"wrapper_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *KeyBytesRequest) Reset() {
 	*x = KeyBytesRequest{}
-	mi := &file_plugin_pb_plugin_proto_msgTypes[14]
+	mi := &file_plugin_pb_plugin_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -645,7 +782,7 @@ func (x *KeyBytesRequest) String() string {
 func (*KeyBytesRequest) ProtoMessage() {}
 
 func (x *KeyBytesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_plugin_pb_plugin_proto_msgTypes[14]
+	mi := &file_plugin_pb_plugin_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -658,7 +795,14 @@ func (x *KeyBytesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use KeyBytesRequest.ProtoReflect.Descriptor instead.
 func (*KeyBytesRequest) Descriptor() ([]byte, []int) {
-	return file_plugin_pb_plugin_proto_rawDescGZIP(), []int{14}
+	return file_plugin_pb_plugin_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *KeyBytesRequest) GetWrapperId() string {
+	if x != nil {
+		return x.WrapperId
+	}
+	return ""
 }
 
 type KeyBytesResponse struct {
@@ -670,7 +814,7 @@ type KeyBytesResponse struct {
 
 func (x *KeyBytesResponse) Reset() {
 	*x = KeyBytesResponse{}
-	mi := &file_plugin_pb_plugin_proto_msgTypes[15]
+	mi := &file_plugin_pb_plugin_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -682,7 +826,7 @@ func (x *KeyBytesResponse) String() string {
 func (*KeyBytesResponse) ProtoMessage() {}
 
 func (x *KeyBytesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_plugin_pb_plugin_proto_msgTypes[15]
+	mi := &file_plugin_pb_plugin_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -695,7 +839,7 @@ func (x *KeyBytesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use KeyBytesResponse.ProtoReflect.Descriptor instead.
 func (*KeyBytesResponse) Descriptor() ([]byte, []int) {
-	return file_plugin_pb_plugin_proto_rawDescGZIP(), []int{15}
+	return file_plugin_pb_plugin_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *KeyBytesResponse) GetKeyBytes() []byte {
@@ -709,21 +853,33 @@ var File_plugin_pb_plugin_proto protoreflect.FileDescriptor
 
 const file_plugin_pb_plugin_proto_rawDesc = "" +
 	"\n" +
-	"\x16plugin/pb/plugin.proto\x12\x02pb\x1a\vtypes.proto\"\r\n" +
-	"\vTypeRequest\"\"\n" +
+	"\x16plugin/pb/plugin.proto\x12\x02pb\x1a\vtypes.proto\"\x10\n" +
+	"\x0eFactoryRequest\"0\n" +
+	"\x0fFactoryResponse\x12\x1d\n" +
+	"\n" +
+	"wrapper_id\x18\x01 \x01(\tR\twrapperId\",\n" +
+	"\vTypeRequest\x12\x1d\n" +
+	"\n" +
+	"wrapper_id\x18\x01 \x01(\tR\twrapperId\"\"\n" +
 	"\fTypeResponse\x12\x12\n" +
 	"\x04type\x18\n" +
-	" \x01(\tR\x04type\"\x0e\n" +
-	"\fKeyIdRequest\"'\n" +
+	" \x01(\tR\x04type\"-\n" +
+	"\fKeyIdRequest\x12\x1d\n" +
+	"\n" +
+	"wrapper_id\x18\x01 \x01(\tR\twrapperId\"'\n" +
 	"\rKeyIdResponse\x12\x16\n" +
 	"\x06key_id\x18\n" +
-	" \x01(\tR\x06key_id\"?\n" +
-	"\x10SetConfigRequest\x12+\n" +
+	" \x01(\tR\x06key_id\"^\n" +
+	"\x10SetConfigRequest\x12\x1d\n" +
+	"\n" +
+	"wrapper_id\x18\x01 \x01(\tR\twrapperId\x12+\n" +
 	"\aoptions\x18\x14 \x01(\v2\x11.wrapping.OptionsR\aoptions\"S\n" +
 	"\x11SetConfigResponse\x12>\n" +
 	"\x0ewrapper_config\x18\n" +
-	" \x01(\v2\x17.wrapping.WrapperConfigR\rwrapperConfig\"[\n" +
-	"\x0eEncryptRequest\x12\x1c\n" +
+	" \x01(\v2\x17.wrapping.WrapperConfigR\rwrapperConfig\"z\n" +
+	"\x0eEncryptRequest\x12\x1d\n" +
+	"\n" +
+	"wrapper_id\x18\x01 \x01(\tR\twrapperId\x12\x1c\n" +
 	"\tplaintext\x18\n" +
 	" \x01(\fR\tplaintext\x12+\n" +
 	"\aoptions\x18\x14 \x01(\v2\x11.wrapping.OptionsR\aoptions\"E\n" +
@@ -731,8 +887,10 @@ const file_plugin_pb_plugin_proto_rawDesc = "" +
 	"\n" +
 	"ciphertext\x18\n" +
 	" \x01(\v2\x12.wrapping.BlobInfoR\n" +
-	"ciphertext\"q\n" +
-	"\x0eDecryptRequest\x122\n" +
+	"ciphertext\"\x90\x01\n" +
+	"\x0eDecryptRequest\x12\x1d\n" +
+	"\n" +
+	"wrapper_id\x18\x01 \x01(\tR\twrapperId\x122\n" +
 	"\n" +
 	"ciphertext\x18\n" +
 	" \x01(\v2\x12.wrapping.BlobInfoR\n" +
@@ -740,18 +898,25 @@ const file_plugin_pb_plugin_proto_rawDesc = "" +
 	"\aoptions\x18\x14 \x01(\v2\x11.wrapping.OptionsR\aoptions\"/\n" +
 	"\x0fDecryptResponse\x12\x1c\n" +
 	"\tplaintext\x18\n" +
-	" \x01(\fR\tplaintext\":\n" +
-	"\vInitRequest\x12+\n" +
+	" \x01(\fR\tplaintext\"Y\n" +
+	"\vInitRequest\x12\x1d\n" +
+	"\n" +
+	"wrapper_id\x18\x01 \x01(\tR\twrapperId\x12+\n" +
 	"\aoptions\x18\x14 \x01(\v2\x11.wrapping.OptionsR\aoptions\"\x0e\n" +
-	"\fInitResponse\">\n" +
-	"\x0fFinalizeRequest\x12+\n" +
+	"\fInitResponse\"]\n" +
+	"\x0fFinalizeRequest\x12\x1d\n" +
+	"\n" +
+	"wrapper_id\x18\x01 \x01(\tR\twrapperId\x12+\n" +
 	"\aoptions\x18\x14 \x01(\v2\x11.wrapping.OptionsR\aoptions\"\x12\n" +
-	"\x10FinalizeResponse\"\x11\n" +
-	"\x0fKeyBytesRequest\"0\n" +
+	"\x10FinalizeResponse\"0\n" +
+	"\x0fKeyBytesRequest\x12\x1d\n" +
+	"\n" +
+	"wrapper_id\x18\x01 \x01(\tR\twrapperId\"0\n" +
 	"\x10KeyBytesResponse\x12\x1c\n" +
 	"\tkey_bytes\x18\n" +
-	" \x01(\fR\tkey_bytes2\x9d\x03\n" +
-	"\aWrapper\x12)\n" +
+	" \x01(\fR\tkey_bytes2\xd1\x03\n" +
+	"\aWrapper\x122\n" +
+	"\aFactory\x12\x12.pb.FactoryRequest\x1a\x13.pb.FactoryResponse\x12)\n" +
 	"\x04Type\x12\x0f.pb.TypeRequest\x1a\x10.pb.TypeResponse\x12,\n" +
 	"\x05KeyId\x12\x10.pb.KeyIdRequest\x1a\x11.pb.KeyIdResponse\x128\n" +
 	"\tSetConfig\x12\x14.pb.SetConfigRequest\x1a\x15.pb.SetConfigResponse\x122\n" +
@@ -773,55 +938,59 @@ func file_plugin_pb_plugin_proto_rawDescGZIP() []byte {
 	return file_plugin_pb_plugin_proto_rawDescData
 }
 
-var file_plugin_pb_plugin_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
+var file_plugin_pb_plugin_proto_msgTypes = make([]protoimpl.MessageInfo, 18)
 var file_plugin_pb_plugin_proto_goTypes = []any{
-	(*TypeRequest)(nil),       // 0: pb.TypeRequest
-	(*TypeResponse)(nil),      // 1: pb.TypeResponse
-	(*KeyIdRequest)(nil),      // 2: pb.KeyIdRequest
-	(*KeyIdResponse)(nil),     // 3: pb.KeyIdResponse
-	(*SetConfigRequest)(nil),  // 4: pb.SetConfigRequest
-	(*SetConfigResponse)(nil), // 5: pb.SetConfigResponse
-	(*EncryptRequest)(nil),    // 6: pb.EncryptRequest
-	(*EncryptResponse)(nil),   // 7: pb.EncryptResponse
-	(*DecryptRequest)(nil),    // 8: pb.DecryptRequest
-	(*DecryptResponse)(nil),   // 9: pb.DecryptResponse
-	(*InitRequest)(nil),       // 10: pb.InitRequest
-	(*InitResponse)(nil),      // 11: pb.InitResponse
-	(*FinalizeRequest)(nil),   // 12: pb.FinalizeRequest
-	(*FinalizeResponse)(nil),  // 13: pb.FinalizeResponse
-	(*KeyBytesRequest)(nil),   // 14: pb.KeyBytesRequest
-	(*KeyBytesResponse)(nil),  // 15: pb.KeyBytesResponse
-	(*v2.Options)(nil),        // 16: wrapping.Options
-	(*v2.WrapperConfig)(nil),  // 17: wrapping.WrapperConfig
-	(*v2.BlobInfo)(nil),       // 18: wrapping.BlobInfo
+	(*FactoryRequest)(nil),    // 0: pb.FactoryRequest
+	(*FactoryResponse)(nil),   // 1: pb.FactoryResponse
+	(*TypeRequest)(nil),       // 2: pb.TypeRequest
+	(*TypeResponse)(nil),      // 3: pb.TypeResponse
+	(*KeyIdRequest)(nil),      // 4: pb.KeyIdRequest
+	(*KeyIdResponse)(nil),     // 5: pb.KeyIdResponse
+	(*SetConfigRequest)(nil),  // 6: pb.SetConfigRequest
+	(*SetConfigResponse)(nil), // 7: pb.SetConfigResponse
+	(*EncryptRequest)(nil),    // 8: pb.EncryptRequest
+	(*EncryptResponse)(nil),   // 9: pb.EncryptResponse
+	(*DecryptRequest)(nil),    // 10: pb.DecryptRequest
+	(*DecryptResponse)(nil),   // 11: pb.DecryptResponse
+	(*InitRequest)(nil),       // 12: pb.InitRequest
+	(*InitResponse)(nil),      // 13: pb.InitResponse
+	(*FinalizeRequest)(nil),   // 14: pb.FinalizeRequest
+	(*FinalizeResponse)(nil),  // 15: pb.FinalizeResponse
+	(*KeyBytesRequest)(nil),   // 16: pb.KeyBytesRequest
+	(*KeyBytesResponse)(nil),  // 17: pb.KeyBytesResponse
+	(*v2.Options)(nil),        // 18: wrapping.Options
+	(*v2.WrapperConfig)(nil),  // 19: wrapping.WrapperConfig
+	(*v2.BlobInfo)(nil),       // 20: wrapping.BlobInfo
 }
 var file_plugin_pb_plugin_proto_depIdxs = []int32{
-	16, // 0: pb.SetConfigRequest.options:type_name -> wrapping.Options
-	17, // 1: pb.SetConfigResponse.wrapper_config:type_name -> wrapping.WrapperConfig
-	16, // 2: pb.EncryptRequest.options:type_name -> wrapping.Options
-	18, // 3: pb.EncryptResponse.ciphertext:type_name -> wrapping.BlobInfo
-	18, // 4: pb.DecryptRequest.ciphertext:type_name -> wrapping.BlobInfo
-	16, // 5: pb.DecryptRequest.options:type_name -> wrapping.Options
-	16, // 6: pb.InitRequest.options:type_name -> wrapping.Options
-	16, // 7: pb.FinalizeRequest.options:type_name -> wrapping.Options
-	0,  // 8: pb.Wrapper.Type:input_type -> pb.TypeRequest
-	2,  // 9: pb.Wrapper.KeyId:input_type -> pb.KeyIdRequest
-	4,  // 10: pb.Wrapper.SetConfig:input_type -> pb.SetConfigRequest
-	6,  // 11: pb.Wrapper.Encrypt:input_type -> pb.EncryptRequest
-	8,  // 12: pb.Wrapper.Decrypt:input_type -> pb.DecryptRequest
-	10, // 13: pb.Wrapper.Init:input_type -> pb.InitRequest
-	12, // 14: pb.Wrapper.Finalize:input_type -> pb.FinalizeRequest
-	14, // 15: pb.Wrapper.KeyBytes:input_type -> pb.KeyBytesRequest
-	1,  // 16: pb.Wrapper.Type:output_type -> pb.TypeResponse
-	3,  // 17: pb.Wrapper.KeyId:output_type -> pb.KeyIdResponse
-	5,  // 18: pb.Wrapper.SetConfig:output_type -> pb.SetConfigResponse
-	7,  // 19: pb.Wrapper.Encrypt:output_type -> pb.EncryptResponse
-	9,  // 20: pb.Wrapper.Decrypt:output_type -> pb.DecryptResponse
-	11, // 21: pb.Wrapper.Init:output_type -> pb.InitResponse
-	13, // 22: pb.Wrapper.Finalize:output_type -> pb.FinalizeResponse
-	15, // 23: pb.Wrapper.KeyBytes:output_type -> pb.KeyBytesResponse
-	16, // [16:24] is the sub-list for method output_type
-	8,  // [8:16] is the sub-list for method input_type
+	18, // 0: pb.SetConfigRequest.options:type_name -> wrapping.Options
+	19, // 1: pb.SetConfigResponse.wrapper_config:type_name -> wrapping.WrapperConfig
+	18, // 2: pb.EncryptRequest.options:type_name -> wrapping.Options
+	20, // 3: pb.EncryptResponse.ciphertext:type_name -> wrapping.BlobInfo
+	20, // 4: pb.DecryptRequest.ciphertext:type_name -> wrapping.BlobInfo
+	18, // 5: pb.DecryptRequest.options:type_name -> wrapping.Options
+	18, // 6: pb.InitRequest.options:type_name -> wrapping.Options
+	18, // 7: pb.FinalizeRequest.options:type_name -> wrapping.Options
+	0,  // 8: pb.Wrapper.Factory:input_type -> pb.FactoryRequest
+	2,  // 9: pb.Wrapper.Type:input_type -> pb.TypeRequest
+	4,  // 10: pb.Wrapper.KeyId:input_type -> pb.KeyIdRequest
+	6,  // 11: pb.Wrapper.SetConfig:input_type -> pb.SetConfigRequest
+	8,  // 12: pb.Wrapper.Encrypt:input_type -> pb.EncryptRequest
+	10, // 13: pb.Wrapper.Decrypt:input_type -> pb.DecryptRequest
+	12, // 14: pb.Wrapper.Init:input_type -> pb.InitRequest
+	14, // 15: pb.Wrapper.Finalize:input_type -> pb.FinalizeRequest
+	16, // 16: pb.Wrapper.KeyBytes:input_type -> pb.KeyBytesRequest
+	1,  // 17: pb.Wrapper.Factory:output_type -> pb.FactoryResponse
+	3,  // 18: pb.Wrapper.Type:output_type -> pb.TypeResponse
+	5,  // 19: pb.Wrapper.KeyId:output_type -> pb.KeyIdResponse
+	7,  // 20: pb.Wrapper.SetConfig:output_type -> pb.SetConfigResponse
+	9,  // 21: pb.Wrapper.Encrypt:output_type -> pb.EncryptResponse
+	11, // 22: pb.Wrapper.Decrypt:output_type -> pb.DecryptResponse
+	13, // 23: pb.Wrapper.Init:output_type -> pb.InitResponse
+	15, // 24: pb.Wrapper.Finalize:output_type -> pb.FinalizeResponse
+	17, // 25: pb.Wrapper.KeyBytes:output_type -> pb.KeyBytesResponse
+	17, // [17:26] is the sub-list for method output_type
+	8,  // [8:17] is the sub-list for method input_type
 	8,  // [8:8] is the sub-list for extension type_name
 	8,  // [8:8] is the sub-list for extension extendee
 	0,  // [0:8] is the sub-list for field type_name
@@ -838,7 +1007,7 @@ func file_plugin_pb_plugin_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_plugin_pb_plugin_proto_rawDesc), len(file_plugin_pb_plugin_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   16,
+			NumMessages:   18,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -19,11 +19,12 @@ var (
 )
 
 type gRPCWrapperClient struct {
-	impl pb.WrapperClient
+	id     string
+	client pb.WrapperClient
 }
 
 func (wc *gRPCWrapperClient) Type(ctx context.Context) (wrapping.WrapperType, error) {
-	resp, err := wc.impl.Type(ctx, new(pb.TypeRequest))
+	resp, err := wc.client.Type(ctx, &pb.TypeRequest{WrapperId: wc.id})
 	if err != nil {
 		return wrapping.WrapperTypeUnknown, err
 	}
@@ -31,7 +32,7 @@ func (wc *gRPCWrapperClient) Type(ctx context.Context) (wrapping.WrapperType, er
 }
 
 func (wc *gRPCWrapperClient) KeyId(ctx context.Context) (string, error) {
-	resp, err := wc.impl.KeyId(ctx, new(pb.KeyIdRequest))
+	resp, err := wc.client.KeyId(ctx, &pb.KeyIdRequest{WrapperId: wc.id})
 	if err != nil {
 		return "", err
 	}
@@ -43,8 +44,9 @@ func (wc *gRPCWrapperClient) SetConfig(ctx context.Context, options ...wrapping.
 	if err != nil {
 		return nil, err
 	}
-	resp, err := wc.impl.SetConfig(ctx, &pb.SetConfigRequest{
-		Options: opts,
+	resp, err := wc.client.SetConfig(ctx, &pb.SetConfigRequest{
+		Options:   opts,
+		WrapperId: wc.id,
 	})
 	if err != nil {
 		return nil, err
@@ -57,9 +59,10 @@ func (wc *gRPCWrapperClient) Encrypt(ctx context.Context, pt []byte, options ...
 	if err != nil {
 		return nil, err
 	}
-	resp, err := wc.impl.Encrypt(ctx, &pb.EncryptRequest{
+	resp, err := wc.client.Encrypt(ctx, &pb.EncryptRequest{
 		Plaintext: pt,
 		Options:   opts,
+		WrapperId: wc.id,
 	})
 	if err != nil {
 		return nil, err
@@ -72,9 +75,10 @@ func (wc *gRPCWrapperClient) Decrypt(ctx context.Context, ct *wrapping.BlobInfo,
 	if err != nil {
 		return nil, err
 	}
-	resp, err := wc.impl.Decrypt(ctx, &pb.DecryptRequest{
+	resp, err := wc.client.Decrypt(ctx, &pb.DecryptRequest{
 		Ciphertext: ct,
 		Options:    opts,
+		WrapperId:  wc.id,
 	})
 	if err != nil {
 		return nil, err
@@ -82,13 +86,14 @@ func (wc *gRPCWrapperClient) Decrypt(ctx context.Context, ct *wrapping.BlobInfo,
 	return resp.Plaintext, nil
 }
 
-func (ifc *gRPCWrapperClient) Init(ctx context.Context, options ...wrapping.Option) error {
+func (wc *gRPCWrapperClient) Init(ctx context.Context, options ...wrapping.Option) error {
 	opts, err := wrapping.GetOpts(options...)
 	if err != nil {
 		return err
 	}
-	_, err = ifc.impl.Init(ctx, &pb.InitRequest{
-		Options: opts,
+	_, err = wc.client.Init(ctx, &pb.InitRequest{
+		Options:   opts,
+		WrapperId: wc.id,
 	})
 	return err
 }
@@ -98,14 +103,15 @@ func (wc *gRPCWrapperClient) Finalize(ctx context.Context, options ...wrapping.O
 	if err != nil {
 		return err
 	}
-	_, err = wc.impl.Finalize(ctx, &pb.FinalizeRequest{
-		Options: opts,
+	_, err = wc.client.Finalize(ctx, &pb.FinalizeRequest{
+		Options:   opts,
+		WrapperId: wc.id,
 	})
 	return err
 }
 
 func (wc *gRPCWrapperClient) KeyBytes(ctx context.Context) ([]byte, error) {
-	resp, err := wc.impl.KeyBytes(ctx, new(pb.KeyBytesRequest))
+	resp, err := wc.client.KeyBytes(ctx, &pb.KeyBytesRequest{WrapperId: wc.id})
 	switch {
 	case err == nil:
 	case status.Code(err) == codes.Unimplemented:

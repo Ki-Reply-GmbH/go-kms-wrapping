@@ -11,7 +11,6 @@ import (
 	"github.com/hashicorp/go-plugin"
 	"github.com/openbao/go-kms-wrapping/plugin/v2/pb"
 	"github.com/openbao/go-kms-wrapping/v2"
-	"github.com/openbao/openbao/sdk/v2/helper/pluginutil"
 	"google.golang.org/grpc"
 )
 
@@ -21,8 +20,8 @@ type ServeOpts struct {
 	Logger             log.Logger
 }
 
-// Serve is used to serve a multiplexed KMS plugin. This is typically called in
-// the plugin's main function.
+// Serve is used to serve a KMS plugin. This is typically called in the plugin's
+// main function.
 func Serve(opts *ServeOpts) {
 	logger := opts.Logger
 	if logger == nil {
@@ -71,17 +70,24 @@ type gRPCWrapperPlugin struct {
 }
 
 func (wp *gRPCWrapperPlugin) GRPCServer(broker *plugin.GRPCBroker, s *grpc.Server) error {
-	server := &gRPCWrapperServer{
+	pb.RegisterWrapperServer(s, &gRPCWrapperServer{
 		factory:   wp.factory,
 		instances: make(map[string]wrapping.Wrapper),
-	}
-	pluginutil.RegisterPluginMultiplexingServer(s, pluginutil.PluginMultiplexingServerImpl{
-		Supported: true,
 	})
-	pb.RegisterWrapperServer(s, server)
 	return nil
 }
 
 func (wp *gRPCWrapperPlugin) GRPCClient(ctx context.Context, broker *plugin.GRPCBroker, c *grpc.ClientConn) (any, error) {
-	return &gRPCWrapperClient{impl: pb.NewWrapperClient(c)}, nil
+	client := pb.NewWrapperClient(c)
+
+	// Each call to Dispense() will create a new wrapper.
+	resp, err := client.Factory(ctx, new(pb.FactoryRequest))
+	if err != nil {
+		return nil, err
+	}
+
+	return &gRPCWrapperClient{
+		id:     resp.WrapperId,
+		client: client,
+	}, nil
 }

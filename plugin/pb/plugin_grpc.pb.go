@@ -22,6 +22,7 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
+	Wrapper_Factory_FullMethodName   = "/pb.Wrapper/Factory"
 	Wrapper_Type_FullMethodName      = "/pb.Wrapper/Type"
 	Wrapper_KeyId_FullMethodName     = "/pb.Wrapper/KeyId"
 	Wrapper_SetConfig_FullMethodName = "/pb.Wrapper/SetConfig"
@@ -36,6 +37,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type WrapperClient interface {
+	Factory(ctx context.Context, in *FactoryRequest, opts ...grpc.CallOption) (*FactoryResponse, error)
 	Type(ctx context.Context, in *TypeRequest, opts ...grpc.CallOption) (*TypeResponse, error)
 	KeyId(ctx context.Context, in *KeyIdRequest, opts ...grpc.CallOption) (*KeyIdResponse, error)
 	SetConfig(ctx context.Context, in *SetConfigRequest, opts ...grpc.CallOption) (*SetConfigResponse, error)
@@ -52,6 +54,16 @@ type wrapperClient struct {
 
 func NewWrapperClient(cc grpc.ClientConnInterface) WrapperClient {
 	return &wrapperClient{cc}
+}
+
+func (c *wrapperClient) Factory(ctx context.Context, in *FactoryRequest, opts ...grpc.CallOption) (*FactoryResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(FactoryResponse)
+	err := c.cc.Invoke(ctx, Wrapper_Factory_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *wrapperClient) Type(ctx context.Context, in *TypeRequest, opts ...grpc.CallOption) (*TypeResponse, error) {
@@ -138,6 +150,7 @@ func (c *wrapperClient) KeyBytes(ctx context.Context, in *KeyBytesRequest, opts 
 // All implementations must embed UnimplementedWrapperServer
 // for forward compatibility.
 type WrapperServer interface {
+	Factory(context.Context, *FactoryRequest) (*FactoryResponse, error)
 	Type(context.Context, *TypeRequest) (*TypeResponse, error)
 	KeyId(context.Context, *KeyIdRequest) (*KeyIdResponse, error)
 	SetConfig(context.Context, *SetConfigRequest) (*SetConfigResponse, error)
@@ -156,6 +169,9 @@ type WrapperServer interface {
 // pointer dereference when methods are called.
 type UnimplementedWrapperServer struct{}
 
+func (UnimplementedWrapperServer) Factory(context.Context, *FactoryRequest) (*FactoryResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Factory not implemented")
+}
 func (UnimplementedWrapperServer) Type(context.Context, *TypeRequest) (*TypeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Type not implemented")
 }
@@ -199,6 +215,24 @@ func RegisterWrapperServer(s grpc.ServiceRegistrar, srv WrapperServer) {
 		t.testEmbeddedByValue()
 	}
 	s.RegisterService(&Wrapper_ServiceDesc, srv)
+}
+
+func _Wrapper_Factory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FactoryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WrapperServer).Factory(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Wrapper_Factory_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WrapperServer).Factory(ctx, req.(*FactoryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _Wrapper_Type_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -352,6 +386,10 @@ var Wrapper_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "pb.Wrapper",
 	HandlerType: (*WrapperServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "Factory",
+			Handler:    _Wrapper_Factory_Handler,
+		},
 		{
 			MethodName: "Type",
 			Handler:    _Wrapper_Type_Handler,

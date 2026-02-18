@@ -5,14 +5,19 @@ package plugin
 
 import (
 	"context"
+	"errors"
 	"sync"
 
+	"github.com/hashicorp/go-uuid"
 	"github.com/openbao/go-kms-wrapping/plugin/v2/pb"
 	"github.com/openbao/go-kms-wrapping/v2"
-	"github.com/openbao/openbao/sdk/v2/helper/pluginutil"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
+
+// ErrNoInstance is returned when an RPC is called on a remote object that
+// doesn't exist.
+var ErrNoInstance = errors.New("instance not found")
 
 type gRPCWrapperServer struct {
 	pb.UnimplementedWrapperServer
@@ -23,32 +28,38 @@ type gRPCWrapperServer struct {
 	factory func() wrapping.Wrapper
 }
 
-func (ws *gRPCWrapperServer) getInstance(ctx context.Context) (wrapping.Wrapper, error) {
-	id, err := pluginutil.GetMultiplexIDFromContext(ctx)
+func (ws *gRPCWrapperServer) Factory(ctx context.Context, req *pb.FactoryRequest) (*pb.FactoryResponse, error) {
+	id, err := uuid.GenerateUUID()
 	if err != nil {
 		return nil, err
 	}
 
+	wrapper := ws.factory()
+
+	ws.instancesLock.Lock()
+	ws.instances[id] = wrapper
+	ws.instancesLock.Unlock()
+
+	return &pb.FactoryResponse{WrapperId: id}, nil
+}
+
+func (ws *gRPCWrapperServer) get(id string) (wrapping.Wrapper, error) {
 	ws.instancesLock.Lock()
 	defer ws.instancesLock.Unlock()
 
-	if instance, ok := ws.instances[id]; ok {
-		return instance, nil
+	if wrapper, ok := ws.instances[id]; ok {
+		return wrapper, nil
 	}
 
-	// Since factory takes no parameters, just create a new wrapper ad-hoc if we
-	// don't have one already.
-	instance := ws.factory()
-	ws.instances[id] = instance
-	return instance, nil
+	return nil, ErrNoInstance
 }
 
 func (ws *gRPCWrapperServer) Type(ctx context.Context, req *pb.TypeRequest) (*pb.TypeResponse, error) {
-	impl, err := ws.getInstance(ctx)
+	wrapper, err := ws.get(req.WrapperId)
 	if err != nil {
 		return nil, err
 	}
-	typ, err := impl.Type(ctx)
+	typ, err := wrapper.Type(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -56,11 +67,11 @@ func (ws *gRPCWrapperServer) Type(ctx context.Context, req *pb.TypeRequest) (*pb
 }
 
 func (ws *gRPCWrapperServer) KeyId(ctx context.Context, req *pb.KeyIdRequest) (*pb.KeyIdResponse, error) {
-	impl, err := ws.getInstance(ctx)
+	wrapper, err := ws.get(req.WrapperId)
 	if err != nil {
 		return nil, err
 	}
-	keyId, err := impl.KeyId(ctx)
+	keyId, err := wrapper.KeyId(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +79,7 @@ func (ws *gRPCWrapperServer) KeyId(ctx context.Context, req *pb.KeyIdRequest) (*
 }
 
 func (ws *gRPCWrapperServer) SetConfig(ctx context.Context, req *pb.SetConfigRequest) (*pb.SetConfigResponse, error) {
-	impl, err := ws.getInstance(ctx)
+	wrapper, err := ws.get(req.WrapperId)
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +87,7 @@ func (ws *gRPCWrapperServer) SetConfig(ctx context.Context, req *pb.SetConfigReq
 	if opts == nil {
 		opts = new(wrapping.Options)
 	}
-	wc, err := impl.SetConfig(
+	wc, err := wrapper.SetConfig(
 		ctx,
 		wrapping.WithKeyId(opts.WithKeyId),
 		wrapping.WithConfigMap(opts.WithConfigMap),
@@ -88,7 +99,7 @@ func (ws *gRPCWrapperServer) SetConfig(ctx context.Context, req *pb.SetConfigReq
 }
 
 func (ws *gRPCWrapperServer) Encrypt(ctx context.Context, req *pb.EncryptRequest) (*pb.EncryptResponse, error) {
-	impl, err := ws.getInstance(ctx)
+	wrapper, err := ws.get(req.WrapperId)
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +107,7 @@ func (ws *gRPCWrapperServer) Encrypt(ctx context.Context, req *pb.EncryptRequest
 	if opts == nil {
 		opts = new(wrapping.Options)
 	}
-	ct, err := impl.Encrypt(
+	ct, err := wrapper.Encrypt(
 		ctx,
 		req.Plaintext,
 		wrapping.WithAad(opts.WithAad),
@@ -109,7 +120,7 @@ func (ws *gRPCWrapperServer) Encrypt(ctx context.Context, req *pb.EncryptRequest
 }
 
 func (ws *gRPCWrapperServer) Decrypt(ctx context.Context, req *pb.DecryptRequest) (*pb.DecryptResponse, error) {
-	impl, err := ws.getInstance(ctx)
+	wrapper, err := ws.get(req.WrapperId)
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +128,7 @@ func (ws *gRPCWrapperServer) Decrypt(ctx context.Context, req *pb.DecryptRequest
 	if opts == nil {
 		opts = new(wrapping.Options)
 	}
-	pt, err := impl.Decrypt(
+	pt, err := wrapper.Decrypt(
 		ctx,
 		req.Ciphertext,
 		wrapping.WithAad(opts.WithAad),
@@ -130,11 +141,11 @@ func (ws *gRPCWrapperServer) Decrypt(ctx context.Context, req *pb.DecryptRequest
 }
 
 func (ws *gRPCWrapperServer) Init(ctx context.Context, req *pb.InitRequest) (*pb.InitResponse, error) {
-	impl, err := ws.getInstance(ctx)
+	wrapper, err := ws.get(req.WrapperId)
 	if err != nil {
 		return nil, err
 	}
-	initFinalizer, ok := impl.(wrapping.InitFinalizer)
+	initFinalizer, ok := wrapper.(wrapping.InitFinalizer)
 	if !ok {
 		return &pb.InitResponse{}, nil
 	}
@@ -145,22 +156,13 @@ func (ws *gRPCWrapperServer) Init(ctx context.Context, req *pb.InitRequest) (*pb
 }
 
 func (ws *gRPCWrapperServer) Finalize(ctx context.Context, req *pb.FinalizeRequest) (*pb.FinalizeResponse, error) {
-	id, err := pluginutil.GetMultiplexIDFromContext(ctx)
+	wrapper, err := ws.get(req.WrapperId)
 	if err != nil {
 		return nil, err
 	}
 
-	ws.instancesLock.Lock()
-	impl, ok := ws.instances[id]
-	ws.instancesLock.Unlock()
-
-	// If this instance doesn't exist, just ignore it.
-	if !ok {
-		return &pb.FinalizeResponse{}, nil
-	}
-
-	// Call Finalize if the underlying implementation has it:
-	if initFinalizer, ok := impl.(wrapping.InitFinalizer); ok {
+	// Call Finalize if the underlying implementation has it.
+	if initFinalizer, ok := wrapper.(wrapping.InitFinalizer); ok {
 		if err := initFinalizer.Finalize(ctx); err != nil {
 			return nil, err
 		}
@@ -168,18 +170,18 @@ func (ws *gRPCWrapperServer) Finalize(ctx context.Context, req *pb.FinalizeReque
 
 	// Then remove the instance:
 	ws.instancesLock.Lock()
-	delete(ws.instances, id)
+	delete(ws.instances, req.WrapperId)
 	ws.instancesLock.Unlock()
 
 	return &pb.FinalizeResponse{}, nil
 }
 
 func (ws *gRPCWrapperServer) KeyBytes(ctx context.Context, req *pb.KeyBytesRequest) (*pb.KeyBytesResponse, error) {
-	impl, err := ws.getInstance(ctx)
+	wrapper, err := ws.get(req.WrapperId)
 	if err != nil {
 		return nil, err
 	}
-	keyExporter, ok := impl.(wrapping.KeyExporter)
+	keyExporter, ok := wrapper.(wrapping.KeyExporter)
 	if !ok {
 		return nil, status.Error(codes.Unimplemented, "this Wrapper does not implement KeyExporter")
 	}
