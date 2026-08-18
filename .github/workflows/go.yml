@@ -1,6 +1,10 @@
 name: Go
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - main
+  pull_request:
 
 jobs:
   test:
@@ -55,6 +59,20 @@ jobs:
       - name: Tests
         if: steps.dockerfile.outputs.exists == 'false'
         working-directory: ${{ matrix.directory }}
+        run: go test ./...
+
+      - name: OVH integration tests [PLACEHOLDER]
+        if: matrix.directory == './wrappers/ovhcloudkms'
+        working-directory: ${{ matrix.directory }}
+        env:
+          KMS_ACC_TESTS: 'true'
+          OVHCLOUDKMS_KEY_ID: ${{ secrets.OVHCLOUDKMS_KEY_ID }}
+          OVHCLOUDKMS_ENDPOINT: ${{ secrets.OVHCLOUDKMS_ENDPOINT }}
+          OVHCLOUDKMS_ID: ${{ secrets.OVHCLOUDKMS_ID }}
+          OVHCLOUDKMS_CERT_CLIENT_CERT: ${{ secrets.OVHCLOUD_CERT_CLIENT_CERT }}
+          OVHCLOUDKMS_CERT_CLIENT_KEY: ${{ secrets.OVHCLOUD_CERT_CLIENT_KEY }}
+          OVHCLOUDKMS_SERVICE_ACCOUNT_NAME: ${{ secrets.OVHCLOUDKMS_SERVICE_ACCOUNT_NAME }}
+          OVHCLOUDKMS_SERVICE_ACCOUNT_PASSWORD: ${{ secrets.OVHCLOUDKMS_SERVICE_ACCOUNT_PASSWORD }}
         run: go test ./...
 
       - name: Container tests
